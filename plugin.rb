@@ -6,6 +6,8 @@
 
 enabled_site_setting :directoryopus_enabled
 
+register_asset 'stylesheets/directoryopus.scss'
+
 after_initialize do
 
   # We have two modules as we want to have URLs in two different places on the site.
