@@ -1,0 +1,4 @@
+plugins:
+  directoryopus_enabled:
+    default: true
+    client: true
