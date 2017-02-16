@@ -3,3 +3,4 @@ en:
     directoryopus:
       linkopus_title: "Account Linking"
       linkopus_heading: "Directory Opus - Account Linking"
+      linkopus_hamburger_label: "Account Linking"

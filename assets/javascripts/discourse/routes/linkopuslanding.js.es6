@@ -9,6 +9,7 @@ export default Discourse.Route.extend({
   },
 
   titleToken() {
+    return I18n.t("directoryopus.linkopus_title");
   },
 
   renderTemplate() {

@@ -9,14 +9,18 @@ function apiInitCallback(api)
 		return; // Plugin has been disabled on the server, so make it do nothing on the client.
 	}
 
-	// Plugin can only be used by logged-in users. If anon user, make it do nothing on the client.
-	// Effects of the plugin changing people's groups will still be seen by anon users, since that
-	// is a side effect of that user using the plugin to link their account, not something that
-	// every other user requires the plugin to see the result of.
-	const currentUser = api.getCurrentUser();
-	if (!currentUser) {
-		return;
-	}
+	// Add a link to the account linking landing page into the top-right hamburger menu.
+	// This is so we can tell new users an easy way to find it again after creating an account.
+	// I worked out the names and attributes by looking at the source and then using a debugger
+	// to check exactly what was being looked for when the menu opens. Not obvious or documented
+	// but you start to get a feel for it.
+	api.decorateWidget('hamburger-menu:generalLinks', dec => {
+		return {
+			route: 'linkopuslanding',
+			className: 'link-opus-link',
+			label: 'directoryopus.linkopus_hamburger_label'
+		};
+	});
 }
 
 export default {

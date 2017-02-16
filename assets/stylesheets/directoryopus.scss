@@ -13,3 +13,28 @@
     height: 2.25em;
     vertical-align: -0.65em;
 }
+
+.menu-panel ul.menu-links li .link-opus-link {
+    padding-left: 2em;
+    background-image: url('/plugins/discourse-directoryopus/images/opus_icon.png');
+    background-size: 1.25em;
+    background-repeat: no-repeat;
+    background-position: 0.5em center;
+}
+
+.body-page.directoryopus-link-body > h2 {
+    color: #0088cc;
+    margin: 1.5em 0 1em;
+}
+
+.body-page.directoryopus-link-body > ul {
+    margin: 0 0 0 1.5em;
+}
+
+.body-page.directoryopus-link-body > ul > li > button {
+    padding: 6px 10px;
+}
+
+.body-page.directoryopus-link-body > ul > li > div > img {
+	padding: 0.75em 1.25em;
+}
