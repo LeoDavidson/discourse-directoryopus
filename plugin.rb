@@ -34,7 +34,18 @@ after_initialize do
   class DiscourseOpusLinkLanding::OpuslinklandingController < ::ApplicationController
     # No point even checking if the plugin is enabled for this one -- before_action :ensure_plugin_enabled
     def index
-      render nothing: true
+      # This should never be called, but once in dev I saw errors when going to the client side URL
+      # typed by hand, when this returned "render nothing: true", so I've made it return success instead.
+      
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslinklanding INDEX CALLED -------------------------------------------------"
+      
+      render json: success_json
     end
   end
 
@@ -51,6 +62,15 @@ after_initialize do
     end
 
     def index
+
+      # REMINDER: What do we need to do to respect read-only mode in Discourse, if anything?
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
+      puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
 
       # We'll be called via "/user/<username>/link-opus.json?user_id=<user_id>"
       # That gives us both the name and id. The name is only there so the non-json URL in the browser is nicer.
@@ -71,7 +91,7 @@ after_initialize do
       end
 
       if user_record.blank? || (user_record.id != current_user.id && !current_user.admin?)
-        return render_json_error("You may only manage account-linking information about your own account")
+        return render_json_error("You may only manage account-linking information for your own account")
       end
 
       return render json: {

@@ -1,12 +1,38 @@
 .directoryopus-link-status {
-  outline: 2px solid #060;
-  background-color: rgba(220, 140, 140, 0.6);
-  margin: 0;
-  padding: 0 0.2em;
-  color: #000;
-  font-weight: bold;
-  font-size:  0.9em;
+  .opus-nav-pills {
+    > a {
+      text-decoration: none !important;
+      border: none;
+      padding: 5px 12px;
+      color: $primary;
+      background: dark-light-diff($primary, $secondary, 90%, -65%);
+      font-size: 1.143em;
+      line-height: 20px;
+      transition: background .15s;
+      &:hover {
+        color: $quaternary;
+        background-color: dark-light-diff($quaternary, $secondary, 70%, -70%);
+      }
+    }
+    &.active > a, > a.active {
+      color: $secondary;
+      background-color: $quaternary;
+    }
+    .fa {
+      margin-right: 5px;
+    }
+    a:hover i {
+      color: $quaternary;
+    }
+    a.active i {
+      color: $secondary;
+    }
+    i {
+      color: $primary;
+    }
+  }
 }
+
 
 .directoryopus-link-heading .directoryopus-logo {
     width: 2.25em;
@@ -22,19 +48,59 @@
     background-position: 0.5em center;
 }
 
-.body-page.directoryopus-link-body > h2 {
+.directoryopus-link-getback .link-opus-link {
+    color: #0088cc;
+    white-space: nowrap;
+    padding-left: 1.35em;
+    background-image: url('/plugins/discourse-directoryopus/images/opus_icon.png');
+    background-size: 1.1em;
+    background-repeat: no-repeat;
+    background-position: 0.1em center;
+}
+
+.directoryopus-link-getback {
+    margin-bottom: 1.25em;
+}
+
+.directoryopus-link-getback > p {
+    margin-bottom: 0;
+    text-align: right;
+}
+
+.directoryopus-link-getback .link-opus-menu-shot {
+    float: right;
+    margin-left: 1em;
+}
+
+.directoryopus-link-getback .bottom-clear {
+    clear: both;
+    margin: 0;
+    padding: 0;
+}
+
+.body-page.directoryopus-link-body h2 {
     color: #0088cc;
     margin: 1.5em 0 1em;
 }
 
-.body-page.directoryopus-link-body > ul {
+.body-page.directoryopus-link-body ul {
     margin: 0 0 0 1.5em;
 }
 
-.body-page.directoryopus-link-body > ul > li > button {
+.body-page.directoryopus-link-body ul > li button {
     padding: 6px 10px;
 }
 
-.body-page.directoryopus-link-body > ul > li > div > img {
-	padding: 0.75em 1.25em;
+.body-page.directoryopus-link-body .directoryopus-link-noaccount {
+	background-color: rgba(255, 0, 0, 0.075);
+	margin: 0 -1em 0 -1em;
+	padding: 1em;
+}
+
+.body-page.directoryopus-link-body .directoryopus-link-noaccount > h2:first-of-type {
+	margin-top: 0;
+}
+
+.body-page.directoryopus-link-body .directoryopus-link-noaccount > ul:last-of-type > li:last-of-type {
+	margin-bottom: 0;
 }

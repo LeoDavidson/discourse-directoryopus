@@ -1,13 +1,68 @@
 <div class="body-page directoryopus-link-body">
-	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> {{i18n "directoryopus.linkopus_heading"}}</h1>
 
-	<hr>
-	
 	{{#if model}}
-		<p>I have a model</p>
-	{{else}}	
-		<p>I do NOT have a model</p>
+		<hr>
 	{{/if}}
 
-	<p>{{model}}</p>
+	<p>model.opuslinkLoadResult: {{model.opuslinkLoadResult}}</p>
+	<p>model.opuslinkLoadResult.forum_username: {{model.opuslinkLoadResult.forum_username}}</p>
+	<p>model.opuslinkLoadError: {{model.opuslinkLoadError}}</p>
+
+	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> {{i18n "directoryopus.linkopus_heading"}}</h1>
+
+	{{#if model}}
+		<p>Username: {{model.username}}</p>
+		<p>User ID: {{model.id}}</p>
+	{{/if}}
+
+
+	{{#if model}}
+		{{#if model.linkstatus}}
+			<p>AJAX: {{model.linkstatus}}</p>
+			<p>AJAX state: {{model.linkstatus.state}}</p>
+			<p>Link Status: {{model.linkstatus.reg_status}}</p>
+			<p>Link Edition: {{model.linkstatus.reg_edition}}</p>
+			<p>Link Version: {{model.linkstatus.reg_version}}</p>
+		{{/if}}
+	{{/if}}
+
+
+	<hr>
+
+	<div class="directoryopus-link-getback">
+		<img class="link-opus-menu-shot" src="/plugins/discourse-directoryopus/images/opus_account_link_menu.png" width="334" height="181" alt="[Menu Screenshot]">
+		<p>You can get back to this page via <span class="link-opus-link">{{i18n "directoryopus.linkopus_hamburger_label"}}</span> in the top-right menu.</p>
+		<div class="bottom-clear" />
+	</div>
+
+	{{#unless model}}
+		<div class="directoryopus-link-noaccount">
+			<h2>You Are Not Logged In</h2>
+			<ul>
+				<li>If you do not have a forum account, please {{d-button action="showCreateAccount" class="btn-primary btn-small sign-up-button" label="sign_up"}}, then return here.</li>
+				<li>If you already made a forum account, please {{d-button action="showLogin" class="btn-primary btn-small login-button" icon="user" label="log_in"}}.</li>
+			</ul>
+		</div>
+
+		<h2>Forum Accounts</h2>
+		<ul>
+			<li>You need a free forum account to post (but not to read, search or download).</li>
+			<li>If you're evaluating Opus, you are welcome to make a forum account and ask questions.</li>
+			<li>If you own an Opus licence, you can link it to your forum account.</li>
+		</ul>
+	{{/unless}}
+
+	<h2>What Account Linking Does</h2>
+	<ul>
+		<li>Linking your Opus licence to your forum account marks your posts as from a registered user.</li>
+		<li>We'll be more likely to give detailed answers and implement your suggestions.</li>
+		<li>We'll know your Opus version (e.g. <i>Opus 12 Pro</i>). The helps us answer your questions.</li>
+	</ul>
+
+	<h2>What Account Linking Does Not Do</h2>
+	<ul>
+		<li>Simple questions may still be answered before ones requiring research, no matter who each comes from.</li>
+		<li>Linking gives your requests a boost but does not guarantee when or if they will be implemented.</li>
+		<li>The forum's <a href="/faq">Guidelines</a> and <a href="/tos">Terms of Service</a> still apply.</li>
+	</ul>
 </div>
