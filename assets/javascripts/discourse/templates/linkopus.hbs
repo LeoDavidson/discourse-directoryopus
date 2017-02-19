@@ -4,19 +4,17 @@
 		<hr>
 	{{/if}}
 
-	<p>model.opuslinkLoadResult: {{model.opuslinkLoadResult}}</p>
-	<p>model.opuslinkLoadResult.forum_username: {{model.opuslinkLoadResult.forum_username}}</p>
-	<p>model.opuslinkLoadError: {{model.opuslinkLoadError}}</p>
-
 	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> {{i18n "directoryopus.linkopus_heading"}}</h1>
 
 	{{#if model}}
+		<p>model.opuslinkLoadResult: {{model.opuslinkLoadResult}}</p>
+		<p>model.opuslinkLoadResult.forum_username: {{model.opuslinkLoadResult.forum_username}}</p>
+		<p>model.opuslinkLoadError: {{model.opuslinkLoadError}}</p>
+
 		<p>Username: {{model.username}}</p>
 		<p>User ID: {{model.id}}</p>
-	{{/if}}
 
 
-	{{#if model}}
 		{{#if model.linkstatus}}
 			<p>AJAX: {{model.linkstatus}}</p>
 			<p>AJAX state: {{model.linkstatus.state}}</p>
@@ -26,16 +24,14 @@
 		{{/if}}
 	{{/if}}
 
-
 	<hr>
 
-	<div class="directoryopus-link-getback">
-		<img class="link-opus-menu-shot" src="/plugins/discourse-directoryopus/images/opus_account_link_menu.png" width="334" height="181" alt="[Menu Screenshot]">
-		<p>You can get back to this page via <span class="link-opus-link">{{i18n "directoryopus.linkopus_hamburger_label"}}</span> in the top-right menu.</p>
-		<div class="bottom-clear" />
-	</div>
-
 	{{#unless model}}
+		<p class="directoryopus-link-getback">
+			You can get back to this page via <span class="link-opus-link">{{i18n "directoryopus.linkopus_hamburger_label"}}</span> in the top-right menu.
+			<img class="link-opus-menu-shot" src="/plugins/discourse-directoryopus/images/opus_account_link_menu.png" width="334" height="181" alt="[Menu Screenshot]">
+		</p>
+
 		<div class="directoryopus-link-noaccount">
 			<h2>You Are Not Logged In</h2>
 			<ul>

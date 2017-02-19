@@ -94,12 +94,14 @@ after_initialize do
         return render_json_error("You may only manage account-linking information for your own account")
       end
 
-      return render json: {
-        forum_username: user_record.username,
+      resultFromServer = {
+        original_username: user_record.username,
         reg_status: "linked",
         reg_edition: "pro",
         reg_version: "12"
       }
+
+      return render json: resultFromServer
 
     end
   end
