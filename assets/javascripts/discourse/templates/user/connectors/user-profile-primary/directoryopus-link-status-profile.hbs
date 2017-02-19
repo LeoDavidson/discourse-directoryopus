@@ -5,9 +5,9 @@
 
 			{{#if opusCanLinkUser}}
 				{{#if opusViewingSelf}}
-					<span class="opus-nav-pills">{{#link-to 'linkopus'}}{{fa-icon "link"}}{{i18n 'directoryopus.linkopus_user_button_you'}}{{/link-to}}</span>
+					<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{i18n 'directoryopus.linkopus_user_button_you'}}{{/link-to}}</span>
 				{{else}}
-					<span class="opus-nav-pills">{{#link-to 'linkopus'}}{{fa-icon "link"}}{{i18n 'directoryopus.linkopus_user_button_other'}}{{/link-to}}</span>
+					<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{fa-icon "link"}}{{i18n 'directoryopus.linkopus_user_button_other'}}{{/link-to}}</span>
 				{{/if}}
 			{{/if}}
 		</p>
