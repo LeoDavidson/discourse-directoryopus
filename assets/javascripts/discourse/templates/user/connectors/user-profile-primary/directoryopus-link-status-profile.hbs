@@ -13,11 +13,17 @@
 		</p>
 
 		<p>
-			directoryopus-link-status-profile.hbs:
-			model.username: {{model.username}},
-			currentUser.staff: {{currentUser.staff}},
-			opusViewingSelf: {{opusViewingSelf}},
-			opusCanLinkUser: {{opusCanLinkUser}}
+			siteSettings.directoryopus_enabled: {{siteSettings.directoryopus_enabled}}<br>
+			siteSettings.directoryopus_account_link_url: {{siteSettings.directoryopus_account_link_url}}<br>
+			siteSettings.directoryopus_account_link_code_code: {{siteSettings.directoryopus_account_link_code_code}}<br>
+			siteSettings.directoryopus_account_link_code_name: {{siteSettings.directoryopus_account_link_code_name}}<br>
+		</p>
+		<p>
+			directoryopus-link-status-profile.hbs<br>
+			model.username: {{model.username}},<br>
+			currentUser.staff: {{currentUser.staff}},<br>
+			opusViewingSelf: {{opusViewingSelf}},<br>
+			opusCanLinkUser: {{opusCanLinkUser}}<br>
 		</p>
 	</div>
 {{/if}}

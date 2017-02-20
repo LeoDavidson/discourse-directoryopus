@@ -8,6 +8,9 @@ enabled_site_setting :directoryopus_enabled
 
 register_asset 'stylesheets/directoryopus.scss'
 
+require 'net/http'
+require 'json'
+
 after_initialize do
 
   # We have two modules as we want to have URLs in two different places on the site.
@@ -58,7 +61,79 @@ after_initialize do
     before_action :ensure_logged_in
 
     def ensure_plugin_enabled
-      raise Discourse::InvalidAccess.new('Directory Opus plugin is not enabled') if !SiteSetting.directoryopus_enabled
+      if !SiteSetting.directoryopus_enabled
+        raise Discourse::InvalidAccess.new('Directory Opus plugin is not enabled')
+      end
+      if (SiteSetting.directoryopus_account_link_url.blank? || SiteSetting.directoryopus_account_link_code_name.blank? || SiteSetting.directoryopus_account_link_code_code.blank?)
+        raise Discourse::InvalidAccess.new('Directory Opus plugin is not configured')
+      end
+      if !SiteSetting.directoryopus_account_link_url.downcase.start_with?("https://")
+        raise Discourse::InvalidAccess.new('Directory Opus plugin is misconfigured')
+      end
+    end
+
+    # callRemoteLinkingServer("echo", { :hello => "moo Hello", :there => "cow" } )
+    def callRemoteLinkingServer(action, params)
+      begin
+        paramsAug = params.clone
+        paramsAug[:action] = action
+        paramsAug[SiteSetting.directoryopus_account_link_code_name.to_sym] = SiteSetting.directoryopus_account_link_code_code
+        checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
+        checkCodeUri.query = URI.encode_www_form(checkCodeParams)
+        res = Net::HTTP.get(checkCodeuri)
+        return JSON.parse(res)
+      rescue
+        return false
+      end
+    end
+
+    def setUserLinkData(user, link_status, link_version, link_edition, link_id)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      statusLower = link_status.downcase
+      if (statusLower.blank? || statusLower == "invalid")
+        u.custom_fields["directoryopus_link_status"] = false
+        u.custom_fields["directoryopus_link_version"] = nil
+        u.custom_fields["directoryopus_link_edition"] = nil
+        u.custom_fields["directoryopus_link_id"] = nil
+      elsif (statusLower == "linked" && !link_id.blank?)
+        u.custom_fields["directoryopus_link_status"] = true
+        u.custom_fields["directoryopus_link_version"] = link_version
+        u.custom_fields["directoryopus_link_edition"] = link_edition
+        u.custom_fields["directoryopus_link_id"] = link_id
+      else
+        return false
+      end
+      if (!u.save)
+        return false
+      end
+      return true
+    end
+
+    def getUserLinkData(user)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      link_status = u.custom_fields["directoryopus_link_status"]
+      if (link_status.blank?)
+        return {
+          :link_status => false
+        }
+      else
+        return {
+          :link_status => true,
+          :link_version => u.custom_fields["directoryopus_link_version"],
+          :link_edition => u.custom_fields["directoryopus_link_edition"],
+          :link_id => u.custom_fields["directoryopus_link_id"],
+        }
+      end
     end
 
     def index
@@ -79,31 +154,92 @@ after_initialize do
       #     user_record = User.find_by_username(params[:username])
       #   end
 
+      operationQuery = false
+      operationLink = false
+      operationRefresh = false
+
+      if params.has_key?(:operation)
+        operation = params[:operation]
+        if !operation.is_a? String
+          return render_json_error("Invalid operation")
+        end
+        oplower = operation.downcase
+        if oplower == "link"
+          operationLink = true
+        elsif opLower == "refresh"
+          operationRefresh = true
+        elsif opLower != "query"
+          # operationQuery is set later on, not here.
+          return render_json_error("Invalid operation")
+        end
+      end
+
       user_record = nil
 
       if params.has_key?(:user_id)
-        user_record = User.find_by_id(params[:user_id].to_i)
-        if (user_record.blank? && current_user.admin?)
-          return render_json_error("Invalid user_id \"#{params[:user_id]}\"")
+        user_id = params[:user_id]
+        if user_id.is_a? String
+          user_record = User.find_by_id(user_id.to_i)
         end
-      elsif current_user.admin?
-        return render_json_error("No user_id param")
       end
 
-      if user_record.blank? || (user_record.id != current_user.id && !current_user.admin?)
-        return render_json_error("You may only manage account-linking information for your own account")
+      if user_record.blank?
+        return render_json_error("Invalid user_id")
       end
 
-      resultFromServer = {
-        original_username: user_record.username,
-        reg_status: "linked",
-        reg_edition: "pro",
-        reg_version: "12"
-      }
+      if (operationLink || operationRefresh)
+        if (user_record.id != current_user.id && !current_user.admin?)
+          return render_json_error("You may only manage account-linking information for your own account")
+        end
+      else
+        operationQuery = true
+      end
 
-      return render json: resultFromServer
+      # Get our own local idea of the account's current state.
+      userLinkDetails = getUserLinkData(user_record)
+      if (userLinkDetails.blank?)
+        return render_json_error("Error obtaining account linking details")
+      end
+
+      # If we are just querying things, we can return the state immediately.
+      if operationQuery
+        return render json: userLinkDetails
+      end
+
+      jsonRemoteResult = nil
+
+      if operationRefresh
+        link_id = userLinkDetails[:link_id]
+        if (link_id.blank?)
+          # If we are refreshing, and there is no link_id, then we're done as the details are unchanged.
+          return render json: userLinkDetails
+        end
+        jsonRemoteResult = callRemoteLinkingServer("FailOnPurpose_check", { :linkId => link_id } )
+        if (jsonRemoteResult.blank?)
+          userLinkDetails[:remote_error] = "Error refreshing account linking details"
+          return userLinkDetails
+        end
+      elsif operationLink
+        link_id = userLinkDetails[:link_id]
+        if (!link_id.blank?)
+          # If we are linking, they can't already be linked. Either the UI is confused or someone's sending bogus requests.
+          userLinkDetails[:remote_error] = "Account was already linked"
+          return userLinkDetails
+        end
+
+        # TODO: Throttle the requests so they can't brute-force a reg code.
+        #       After too many failures, block them from being able to link at all and notify all admins.
+        #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
+        userLinkDetails[:remote_error] = "Linking not implemented yet"
+        return userLinkDetails
+      end
+
+      # TODO: Update the user record based on what came out.      
+
+      return render json: userLinkDetails
 
     end
+
   end
 
   DiscourseOpusLinkLanding::Engine.routes.draw do

@@ -2,3 +2,15 @@ plugins:
   directoryopus_enabled:
     default: true
     client: true
+  directoryopus_current_version:
+    default: 12
+    client: true
+  directoryopus_account_link_url:
+    default: ""
+    client: false
+  directoryopus_account_link_code_code:
+    default: ""
+    client: false
+  directoryopus_account_link_code_name:
+    default: ""
+    client: false

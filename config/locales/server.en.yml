@@ -1,3 +1,7 @@
 en:
   site_settings:
     directoryopus_enabled: "Enable plugin for Directory Opus forum (e.g. account linking)?"
+    directoryopus_current_version: "Version number of Directory Opus to consider current. Shown in example text and used to decide if someone is on (or above) the current version, or on an old version."
+    directoryopus_account_link_url: "Parameter for Directory Opus linking API. Must begin with https://."
+    directoryopus_account_link_code_name: "Parameter for Directory Opus linking API."
+    directoryopus_account_link_code_code: "Parameter for Directory Opus linking API."
