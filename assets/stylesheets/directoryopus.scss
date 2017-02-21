@@ -57,7 +57,7 @@
 		vertical-align: -0.65em;
 	}
 	h2 {
-		color: #0088cc;
+		color: $tertiary;
 		margin: 1.5em 0 1em;
 	}
 	ul {
@@ -67,7 +67,7 @@
 		}
 	}
 	.directoryopus-link-noaccount {
-		background-color: rgba(255, 0, 0, 0.075);
+		background-color: rgba($quaternary, 0.17);
 		margin: 0 -1em 0 -1em;
 		padding: 1em 1.5em 1em 1em;
 		display: inline-block;
@@ -80,7 +80,7 @@
 	}
 	.directoryopus-link-getback {
 		.link-opus-link {
-			color: #0088cc;
+			color: $tertiary;
 			white-space: nowrap;
 			padding-left: 1.35em;
 			background-image: url('/plugins/discourse-directoryopus/images/opus_icon.png');
@@ -90,6 +90,18 @@
 		}
 		.link-opus-menu-shot {
 			vertical-align: top;
+		}
+	}
+	.directoryopus-link-loading {
+		font-size: 2em;
+		padding: 2em;
+		color: $tertiary;
+	}
+	.directoryopus-link-loaderror {
+		font-size: 1.75em;
+		.directoryopus-link-errorheading {
+			color: $quaternary;
+			font-weight: bold;
 		}
 	}
 }

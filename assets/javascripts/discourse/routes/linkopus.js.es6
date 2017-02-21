@@ -1,6 +1,3 @@
-import { ajax } from 'discourse/lib/ajax';
-import { extractError } from 'discourse/lib/ajax-error';
-
 export default Discourse.Route.extend({
 
 	model() {
@@ -15,26 +12,13 @@ export default Discourse.Route.extend({
 		if (!userModel.get("can_edit")) {
 			this.replaceWith("user.summary");
 		}
-
-		// loading = true;
-		const username = userModel.get("username");
-		const userid = userModel.get("id");
-		
-		if (userModel.get("opuslinkLoadResult")) {
-			userModel.set("opuslinkLoadError", "That's odd...");
-		}
-		else {
-			// Start the ajax/json request, which is async.
-			// When/if it finishes successfully, store the json results on the model.
-			// If it fails, set a failure error message that is displayed instead.
-			ajax("/users/" + username + "/link-opus.json?user_id=" + userid).
-				then(jsonResult => { userModel.set("opuslinkLoadResult", jsonResult); } ).
-				catch(ajaxError => { userModel.set("opuslinkLoadError", extractError(ajaxError)); });
-		}
 	},
 
 	setupController(controller, userModel) {
 		controller.set('model', userModel);
+		if (typeof userModel !== "undefined") {
+			controller.startLinkQuery(); // Call the server to get the current state of the account.
+		}
 	},
 
 	titleToken() {

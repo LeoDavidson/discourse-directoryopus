@@ -7,20 +7,12 @@
 	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> {{i18n "directoryopus.linkopus_heading"}}</h1>
 
 	{{#if model}}
-		<p>model.opuslinkLoadResult: {{model.opuslinkLoadResult}}</p>
-		<p>model.opuslinkLoadResult.forum_username: {{model.opuslinkLoadResult.forum_username}}</p>
-		<p>model.opuslinkLoadError: {{model.opuslinkLoadError}}</p>
-
-		<p>Username: {{model.username}}</p>
-		<p>User ID: {{model.id}}</p>
-
-
-		{{#if model.linkstatus}}
-			<p>AJAX: {{model.linkstatus}}</p>
-			<p>AJAX state: {{model.linkstatus.state}}</p>
-			<p>Link Status: {{model.linkstatus.reg_status}}</p>
-			<p>Link Edition: {{model.linkstatus.reg_edition}}</p>
-			<p>Link Version: {{model.linkstatus.reg_version}}</p>
+		{{#if ajaxPending}}
+			<p class="directoryopus-link-loading">...Please Wait...</p>
+		{{else if opuslinkLoadError}}
+			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
+		{{else}}
+			<p>(results go here)</p>
 		{{/if}}
 	{{/if}}
 

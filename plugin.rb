@@ -80,6 +80,9 @@ after_initialize do
         paramsAug[SiteSetting.directoryopus_account_link_code_name.to_sym] = SiteSetting.directoryopus_account_link_code_code
         checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
         checkCodeUri.query = URI.encode_www_form(checkCodeParams)
+        # TODO: Find out if we need to do extra to verify the server's certificate is signed by a valid CA here.
+        #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
+        #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
         res = Net::HTTP.get(checkCodeuri)
         return JSON.parse(res)
       rescue
@@ -224,14 +227,14 @@ after_initialize do
         if (!link_id.blank?)
           # If we are linking, they can't already be linked. Either the UI is confused or someone's sending bogus requests.
           userLinkDetails[:remote_error] = "Account was already linked"
-          return userLinkDetails
+          return render json: userLinkDetails
         end
 
         # TODO: Throttle the requests so they can't brute-force a reg code.
         #       After too many failures, block them from being able to link at all and notify all admins.
         #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
         userLinkDetails[:remote_error] = "Linking not implemented yet"
-        return userLinkDetails
+        return render json: userLinkDetails
       end
 
       # TODO: Update the user record based on what came out.      
