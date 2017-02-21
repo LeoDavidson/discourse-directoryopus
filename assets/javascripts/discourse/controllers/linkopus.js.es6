@@ -11,7 +11,7 @@ export default Ember.Controller.extend({
 	opuslinkRegCodeExample: false,
 	opuslinkRegCodeInput: "",
 
-	startLinkQuery() {
+	startLinkQuery(operationName, regCode) {
 
 		if (this.get("opuslinkAjaxPending")) {
 			return;
@@ -31,10 +31,23 @@ export default Ember.Controller.extend({
 		
 		this.set("opuslinkAjaxPending",true);
 
+		var dataParams = {
+			user_id: userid,
+			operation: operationName,
+			reg_code: regCode,
+		};
+
+		// Filter out null parameters. n.b. Can use _.pickBy(obj) with lodash 4, but Discourse seems to be on 1.3.
+		dataParams = _.pick(dataParams, _.identity);
+
 		// Start the ajax/json request, which is async.
 		// When/if it finishes successfully, store the json results on the model.
 		// If it fails, set a failure error message that is displayed instead.
-		ajax("/users/" + username + "/link-opus.json?user_id=" + userid, { type: 'GET', cache: false }).
+		ajax("/users/" + username + "/link-opus.json", {
+				type: 'GET',
+				cache: false,
+				data: dataParams,
+			}).
 			then(jsonResult => this.onLinkQuerySuccess(jsonResult)).
 			catch(ajaxError => this.onLinkQueryFailure(ajaxError));
 	},
@@ -83,6 +96,11 @@ export default Ember.Controller.extend({
 				return;
 			}
 			const regCode = this.getRegCode();
+			if (regCode === "") {
+				this.set("opuslinkLoadResult.remote_error", "You must enter a registration code.");
+				this.set("opuslinkRegCodeExample", true);
+				return;
+			}
 			if (!this.validateRegCode(regCode)) {
 				this.set("opuslinkLoadResult.remote_error", "\"" + regCode + "\" is not the correct format for a registration code.");
 				this.set("opuslinkRegCodeExample", true);
@@ -96,7 +114,7 @@ export default Ember.Controller.extend({
 			this.set("opuslinkRegCodeShowMe", false); // So the video doesn't re-appear if there's an error after the ajax call.
 			this.set("opuslinkLoadResult.remote_error", null);
 			this.set("opuslinkRegCodeExample", false);
-			alert("Submitting: " + regCode);
+			this.startLinkQuery("link", regCode);
 		}
 	},
 });

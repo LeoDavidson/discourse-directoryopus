@@ -141,7 +141,6 @@ after_initialize do
 
     def index
 
-      # TODO What do we need to do to respect read-only mode in Discourse, if anything?
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
@@ -209,6 +208,12 @@ after_initialize do
         return render json: userLinkDetails
       end
 
+      # If the forum is in read-only mode then we can't change anything.
+      if Discourse.readonly_mode?
+        userLinkDetails[:remote_error] = I18n.t('read_only_mode_enabled')
+        return render json: userLinkDetails
+      end
+
       jsonRemoteResult = nil
 
       if operationRefresh
@@ -233,7 +238,17 @@ after_initialize do
         # TODO: Throttle the requests so they can't brute-force a reg code.
         #       After too many failures, block them from being able to link at all and notify all admins.
         #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
+        # TODO: Handle situation where account is already linked, and it looks like it was linked to this account
+        #       but we failed to record the fact on our side. The linkid after first underscore should match our username.
         userLinkDetails[:remote_error] = "Linking not implemented yet"
+        return render json: userLinkDetails
+      end
+
+      # Test read-only mode a second time, as the request to the remote server could have taken a while.
+      # This could mean we have linked the account on the remote server but now not recorded the fact.
+      # The user will have to retry, but we'll handle that situation.
+      if Discourse.readonly_mode?
+        userLinkDetails[:remote_error] = I18n.t('read_only_mode_enabled')
         return render json: userLinkDetails
       end
 
