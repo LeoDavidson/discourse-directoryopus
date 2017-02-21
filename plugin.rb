@@ -141,7 +141,7 @@ after_initialize do
 
     def index
 
-      # REMINDER: What do we need to do to respect read-only mode in Discourse, if anything?
+      # TODO What do we need to do to respect read-only mode in Discourse, if anything?
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"
       puts "------------------------------------------------- Opuslink INDEX CALLED -------------------------------------------------"

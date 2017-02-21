@@ -112,10 +112,13 @@
 		color: $tertiary;
 	}
 	.directoryopus-link-loaderror {
-		font-size: 1.75em;
+		background-color: rgba($quaternary, 0.17);
+		padding: 0.5em;
+		display: flex;
 		.directoryopus-link-errorheading {
-			color: $quaternary;
+			color: $tertiary;
 			font-weight: bold;
+			margin-right: 0.25em;
 		}
 	}
 	.directoryopus-link-unlinked {

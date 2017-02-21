@@ -8,6 +8,7 @@ export default Ember.Controller.extend({
 	opuslinkLoadError: null,
 	opuslinkLoadResult: null,
 	opuslinkRegCodeShowMe: false,
+	opuslinkRegCodeExample: false,
 	opuslinkRegCodeInput: "",
 
 	startLinkQuery() {
@@ -39,20 +40,62 @@ export default Ember.Controller.extend({
 	},
 
 	onLinkQuerySuccess(jsonResult) {
+		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", null);
 		this.set("opuslinkLoadResult", jsonResult);
 		this.set("ajaxPending",false);
 	},
 
 	onLinkQueryFailure(ajaxError) {
-		this.set("opuslinkLoadResult", null);
+		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", extractError(ajaxError));
+		this.set("opuslinkLoadResult", null);
 		this.set("ajaxPending",false);
 	},
+
+	getRegCode() {
+		const regCodeOrig = this.get("opuslinkRegCodeInput");
+		if (typeof regCodeOrig !== "string") {
+			return null;
+			}
+		// Trim spaces, convert to uppercase, and add the dashes if any are missing.
+		// The server side is much more strict, as it expects us to have done this already.
+		var regCode = regCodeOrig.trim().toUpperCase().replace(/^([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})$/, "$1-$2-$3-$4");
+		if (regCode !== regCodeOrig) {
+			this.set("opuslinkRegCodeInput", regCode);
+		}
+		return regCode;
+	},
+
+	validateRegCode(regCode) {
+		if (typeof regCode !== "string") {
+			return false;
+		}
+		if (! /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/.test(regCode) ) {
+			return false;
+		}
+		return true;
+	},
 	
-//	actions: {
-//		onOpusLinkSubmitRegCode {
-//			alert("Submitting");
-//		}
-//	},
+	actions: {
+		onOpusLinkSubmitRegCode() {
+			if (this.get("ajaxPending")) {
+				return;
+			}
+			const regCode = this.getRegCode();
+			if (!this.validateRegCode(regCode)) {
+				this.set("opuslinkLoadResult.remote_error", "\"" + regCode + "\" is not the correct format for a registration code.");
+				this.set("opuslinkRegCodeExample", true);
+				return;
+			}
+			if (regCode === "ABC12-DE3FG-4HIJ5-KL6M7") {
+				this.set("opuslinkLoadResult.remote_error", "You can't use the example registration code. It's just an example. Don't be silly.");
+				this.set("opuslinkRegCodeExample", false);
+				return;
+			}
+			this.set("opuslinkLoadResult.remote_error", null);
+			this.set("opuslinkRegCodeExample", false);
+			alert("Submitting: " + regCode);
+		}
+	},
 });

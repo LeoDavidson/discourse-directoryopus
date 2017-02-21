@@ -13,15 +13,28 @@
 			{{#if opuslinkLoadResult.link_status}}
 				<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_status.link_version}} {{opuslinkLoadResult.link_status.link_edition}} user.</span></p>
 				<p>(Button: Refresh / More Details)</p>
+				{{#if opuslinkLoadResult.remote_error}}
+					<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
+				{{/if}}
 			{{else}}
 				<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
 				<p>To link your account:</p>
 				<form class="directoryopus-link-form">
 					<div class="directoryopus-link-inputs">
-						<label>Directory Opus registration code: {{input value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-[A-Za-z0-9]{5}-[A-Za-z0-9]{5}-[A-Za-z0-9]{5}\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off"}}</label>
-						<button {{action "onOpusLinkSubmitRegCode"}} class="btn btn-primary opus-link" title="Submit">Submit</button>
+						<label>Directory Opus registration code: {{input enter="onOpusLinkSubmitRegCode" value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off" required="true"}}</label>
+						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opusLinkSubmitDisabled}} class="btn btn-primary opus-link" title="Submit">Submit</button>
 					</div>
-
+					{{#if opuslinkLoadResult.remote_error}}
+						<p class="directoryopus-link-loaderror">
+							<span class="directoryopus-link-errorheading">Error:</span>
+							<span class="directoryopus-link-errormessage">
+								{{opuslinkLoadResult.remote_error}}
+								{{#if opuslinkRegCodeExample}}
+									<br>Codes should look like: ABC12-DE3FG-4HIJ5-KL6M7
+								{{/if}}
+							</span>
+						</p>
+					{{/if}}
 					<ul class="directoryopus-link-instructions">
 						<li>Use the most recent code we emailed you. New codes (e.g. for upgrades) replace old ones.</li>
 						<li><a href="https://www.gpsoft.com.au/DScripts/lostcode.asp">Lost Registration Retrieval</a> can email your code again.</li>
@@ -34,10 +47,6 @@
 						<li>Free evaluation codes cannot be linked.</li>
 					</ul>
 				</form>
-			{{/if}}
-			
-			{{#if opuslinkLoadResult.remote_error}}
-				<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
 			{{/if}}
 		{{else}}
 			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">Empty result from server.</span></p>
