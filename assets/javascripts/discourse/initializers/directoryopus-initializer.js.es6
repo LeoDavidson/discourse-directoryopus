@@ -16,7 +16,7 @@ function apiInitCallback(api)
 		return {
 			route: 'linkopuslanding',
 			className: 'link-opus-link',
-			label: 'directoryopus.linkopus_hamburger_label'
+			label: 'directoryopus.linkopus_title'
 		};
 	});
 }

@@ -2,7 +2,3 @@ en:
   js:
     directoryopus:
       linkopus_title: "Account Linking"
-      linkopus_heading: "Directory Opus - Account Linking"
-      linkopus_hamburger_label: "Account Linking"
-      linkopus_user_button_you: "Link Your Account"
-      linkopus_user_button_other: "Link This Account"

@@ -7,10 +7,17 @@ export default Ember.Controller.extend({
 	ajaxPending: false,
 	opuslinkLoadError: null,
 	opuslinkLoadResult: null,
+	opuslinkRegCodeShowMe: false,
+	opuslinkRegCodeInput: "",
 
 	startLinkQuery() {
 
 		if (this.get("ajaxPending")) {
+			return;
+		}
+
+		if (window.location.protocol !== "https:" && Discourse.Environment !== "development") {
+			this.set("opuslinkLoadError", "Submission over http:// is not secure. Please use the site's https:// URL");
 			return;
 		}
 
@@ -42,4 +49,10 @@ export default Ember.Controller.extend({
 		this.set("opuslinkLoadError", extractError(ajaxError));
 		this.set("ajaxPending",false);
 	},
+	
+//	actions: {
+//		onOpusLinkSubmitRegCode {
+//			alert("Submitting");
+//		}
+//	},
 });

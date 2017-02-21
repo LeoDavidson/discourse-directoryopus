@@ -4,26 +4,8 @@
 			Link status goes here.
 
 			{{#if opusCanLinkUser}}
-				{{#if opusViewingSelf}}
-					<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{i18n 'directoryopus.linkopus_user_button_you'}}{{/link-to}}</span>
-				{{else}}
-					<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{fa-icon "link"}}{{i18n 'directoryopus.linkopus_user_button_other'}}{{/link-to}}</span>
-				{{/if}}
+				<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{i18n 'directoryopus.linkopus_title'}}{{/link-to}}</span>
 			{{/if}}
-		</p>
-
-		<p>
-			siteSettings.directoryopus_enabled: {{siteSettings.directoryopus_enabled}}<br>
-			siteSettings.directoryopus_account_link_url: {{siteSettings.directoryopus_account_link_url}}<br>
-			siteSettings.directoryopus_account_link_code_code: {{siteSettings.directoryopus_account_link_code_code}}<br>
-			siteSettings.directoryopus_account_link_code_name: {{siteSettings.directoryopus_account_link_code_name}}<br>
-		</p>
-		<p>
-			directoryopus-link-status-profile.hbs<br>
-			model.username: {{model.username}},<br>
-			currentUser.staff: {{currentUser.staff}},<br>
-			opusViewingSelf: {{opusViewingSelf}},<br>
-			opusCanLinkUser: {{opusCanLinkUser}}<br>
 		</p>
 	</div>
 {{/if}}
