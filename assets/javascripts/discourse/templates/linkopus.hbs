@@ -2,91 +2,88 @@
 
 	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> <span class="directoryopus-link-headingtext">Directory&nbsp;Opus - Account&nbsp;Linking</span></h1>
 
-	{{#if model}}
-		{{#if ajaxPending}}
-			<p class="directoryopus-link-loading">...Please Wait...</p>
-			<hr>
-		{{else if opuslinkLoadError}}
-			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
-			<hr>
-		{{else if opuslinkLoadResult}}
-			{{#if opuslinkLoadResult.link_status}}
-				<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_status.link_version}} {{opuslinkLoadResult.link_status.link_edition}} user.</span></p>
-				<p>(Button: Refresh / More Details)</p>
-				{{#if opuslinkLoadResult.remote_error}}
-					<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
+	{{#if opuslinkAjaxPending}}
+		<p class="directoryopus-link-loading">...Please Wait...</p>
+	{{else}}
+		{{#if model}}
+			{{#if opuslinkLoadError}}
+				<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
+			{{else if opuslinkLoadResult}}
+				{{#if opuslinkLoadResult.link_status}}
+					<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_status.link_version}} {{opuslinkLoadResult.link_status.link_edition}} user.</span></p>
+					<p>(Button: Refresh / More Details)</p>
+					{{#if opuslinkLoadResult.remote_error}}
+						<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
+					{{/if}}
+				{{else}}
+					<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
+					<p>To link your account:</p>
+					<form class="directoryopus-link-form">
+						<div class="directoryopus-link-inputs">
+							<label>Directory Opus registration code: {{input enter="onOpusLinkSubmitRegCode" value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off" required="true"}}</label>
+							<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opusLinkSubmitDisabled}} class="btn btn-primary opus-link" title="Submit">Submit</button>
+						</div>
+						{{#if opuslinkLoadResult.remote_error}}
+							<p class="directoryopus-link-loaderror">
+								<span class="directoryopus-link-errorheading">Error:</span>
+								<span class="directoryopus-link-errormessage">
+									{{opuslinkLoadResult.remote_error}}
+									{{#if opuslinkRegCodeExample}}
+										<br>Codes should look like: ABC12-DE3FG-4HIJ5-KL6M7
+									{{/if}}
+								</span>
+							</p>
+						{{/if}}
+						<ul class="directoryopus-link-instructions">
+							<li>Use the most recent code we emailed you. New codes (e.g. for upgrades) replace old ones.</li>
+							<li><a href="https://www.gpsoft.com.au/DScripts/lostcode.asp">Lost Registration Retrieval</a> can email your code again.</li>
+							<li>You can normally find your registration code via the program itself.
+								<label class="directoryopus-link-showme">{{input type="checkbox" checked=opuslinkRegCodeShowMe class="toggle"}} Show Me</label>
+								{{#if opuslinkRegCodeShowMe}}
+									<p>(TODO: Add video here)</p>
+								{{/if}}
+							</li>
+							<li>Free evaluation codes cannot be linked.</li>
+						</ul>
+					</form>
 				{{/if}}
 			{{else}}
-				<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
-				<p>To link your account:</p>
-				<form class="directoryopus-link-form">
-					<div class="directoryopus-link-inputs">
-						<label>Directory Opus registration code: {{input enter="onOpusLinkSubmitRegCode" value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off" required="true"}}</label>
-						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opusLinkSubmitDisabled}} class="btn btn-primary opus-link" title="Submit">Submit</button>
-					</div>
-					{{#if opuslinkLoadResult.remote_error}}
-						<p class="directoryopus-link-loaderror">
-							<span class="directoryopus-link-errorheading">Error:</span>
-							<span class="directoryopus-link-errormessage">
-								{{opuslinkLoadResult.remote_error}}
-								{{#if opuslinkRegCodeExample}}
-									<br>Codes should look like: ABC12-DE3FG-4HIJ5-KL6M7
-								{{/if}}
-							</span>
-						</p>
-					{{/if}}
-					<ul class="directoryopus-link-instructions">
-						<li>Use the most recent code we emailed you. New codes (e.g. for upgrades) replace old ones.</li>
-						<li><a href="https://www.gpsoft.com.au/DScripts/lostcode.asp">Lost Registration Retrieval</a> can email your code again.</li>
-						<li>You can normally find your registration code via the program itself.
-							<label class="directoryopus-link-showme">{{input type="checkbox" checked=opuslinkRegCodeShowMe class="toggle"}} Show Me</label>
-							{{#if opuslinkRegCodeShowMe}}
-								<p>(Add video here)</p>
-							{{/if}}
-						</li>
-						<li>Free evaluation codes cannot be linked.</li>
-					</ul>
-				</form>
+				<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">Empty result from server.</span></p>
 			{{/if}}
 		{{else}}
-			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">Empty result from server.</span></p>
-			<hr>
-		{{/if}}
-	{{/if}}
+			<p class="directoryopus-link-getback">
+				You can get back to this page via <span class="link-opus-link">{{i18n "directoryopus.linkopus_title"}}</span> in the top-right menu.
+				<img class="link-opus-menu-shot" src="/plugins/discourse-directoryopus/images/opus_account_link_menu.png" width="334" height="181" alt="[Menu Screenshot]">
+			</p>
 
-	{{#unless model}}
-		<p class="directoryopus-link-getback">
-			You can get back to this page via <span class="link-opus-link">{{i18n "directoryopus.linkopus_title"}}</span> in the top-right menu.
-			<img class="link-opus-menu-shot" src="/plugins/discourse-directoryopus/images/opus_account_link_menu.png" width="334" height="181" alt="[Menu Screenshot]">
-		</p>
+			<div class="directoryopus-link-noaccount">
+				<h2>You Are Not Logged In</h2>
+				<ul>
+					<li>If you do not have a forum account, please {{d-button action="showCreateAccount" class="btn-primary btn-small sign-up-button" label="sign_up"}}, then return here.</li>
+					<li>If you already made a forum account, please {{d-button action="showLogin" class="btn-primary btn-small login-button" icon="user" label="log_in"}}.</li>
+				</ul>
+			</div>
 
-		<div class="directoryopus-link-noaccount">
-			<h2>You Are Not Logged In</h2>
+			<h2>Forum Accounts</h2>
 			<ul>
-				<li>If you do not have a forum account, please {{d-button action="showCreateAccount" class="btn-primary btn-small sign-up-button" label="sign_up"}}, then return here.</li>
-				<li>If you already made a forum account, please {{d-button action="showLogin" class="btn-primary btn-small login-button" icon="user" label="log_in"}}.</li>
+				<li>You need a free forum account to post (but not to read, search or download).</li>
+				<li>If you're evaluating Opus, you are welcome to make a forum account and ask questions.</li>
+				<li>If you own an Opus licence, you can link it to your forum account.</li>
 			</ul>
-		</div>
+		{{/if}}
 
-		<h2>Forum Accounts</h2>
+		<h2>What Account Linking Does</h2>
 		<ul>
-			<li>You need a free forum account to post (but not to read, search or download).</li>
-			<li>If you're evaluating Opus, you are welcome to make a forum account and ask questions.</li>
-			<li>If you own an Opus licence, you can link it to your forum account.</li>
+			<li>Linking your Opus licence to your forum account marks your posts as from a registered user.</li>
+			<li>We'll be more likely to give detailed answers and implement your suggestions.</li>
+			<li>We'll know your Opus version (e.g. <i>Opus {{siteSettings.directoryopus_current_version}} Pro</i>). The helps us answer your questions.</li>
 		</ul>
-	{{/unless}}
 
-	<h2>What Account Linking Does</h2>
-	<ul>
-		<li>Linking your Opus licence to your forum account marks your posts as from a registered user.</li>
-		<li>We'll be more likely to give detailed answers and implement your suggestions.</li>
-		<li>We'll know your Opus version (e.g. <i>Opus {{siteSettings.directoryopus_current_version}} Pro</i>). The helps us answer your questions.</li>
-	</ul>
-
-	<h2>What Account Linking Does Not Do</h2>
-	<ul>
-		<li>Simple questions may still be answered before ones requiring research, no matter who each comes from.</li>
-		<li>Linking gives your requests a boost but does not guarantee when or if they will be implemented.</li>
-		<li>The forum's <a href="/faq">Guidelines</a> and <a href="/tos">Terms of Service</a> still apply.</li>
-	</ul>
+		<h2>What Account Linking Does Not Do</h2>
+		<ul>
+			<li>Simple questions may still be answered before ones requiring research, no matter who each comes from.</li>
+			<li>Linking gives your requests a boost but does not guarantee when or if they will be implemented.</li>
+			<li>The forum's <a href="/faq">Guidelines</a> and <a href="/tos">Terms of Service</a> still apply.</li>
+		</ul>
+	{{/if}}
 </div>

@@ -4,7 +4,7 @@ import { extractError } from 'discourse/lib/ajax-error';
 
 export default Ember.Controller.extend({
 	application: Ember.inject.controller(),
-	ajaxPending: false,
+	opuslinkAjaxPending: false,
 	opuslinkLoadError: null,
 	opuslinkLoadResult: null,
 	opuslinkRegCodeShowMe: false,
@@ -13,7 +13,7 @@ export default Ember.Controller.extend({
 
 	startLinkQuery() {
 
-		if (this.get("ajaxPending")) {
+		if (this.get("opuslinkAjaxPending")) {
 			return;
 		}
 
@@ -29,7 +29,7 @@ export default Ember.Controller.extend({
 		const username = userModel.get("username");
 		const userid = userModel.get("id");
 		
-		this.set("ajaxPending",true);
+		this.set("opuslinkAjaxPending",true);
 
 		// Start the ajax/json request, which is async.
 		// When/if it finishes successfully, store the json results on the model.
@@ -43,14 +43,14 @@ export default Ember.Controller.extend({
 		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", null);
 		this.set("opuslinkLoadResult", jsonResult);
-		this.set("ajaxPending",false);
+		this.set("opuslinkAjaxPending",false);
 	},
 
 	onLinkQueryFailure(ajaxError) {
 		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", extractError(ajaxError));
 		this.set("opuslinkLoadResult", null);
-		this.set("ajaxPending",false);
+		this.set("opuslinkAjaxPending",false);
 	},
 
 	getRegCode() {
@@ -79,7 +79,7 @@ export default Ember.Controller.extend({
 	
 	actions: {
 		onOpusLinkSubmitRegCode() {
-			if (this.get("ajaxPending")) {
+			if (this.get("opuslinkAjaxPending")) {
 				return;
 			}
 			const regCode = this.getRegCode();
@@ -93,6 +93,7 @@ export default Ember.Controller.extend({
 				this.set("opuslinkRegCodeExample", false);
 				return;
 			}
+			this.set("opuslinkRegCodeShowMe", false); // So the video doesn't re-appear if there's an error after the ajax call.
 			this.set("opuslinkLoadResult.remote_error", null);
 			this.set("opuslinkRegCodeExample", false);
 			alert("Submitting: " + regCode);
