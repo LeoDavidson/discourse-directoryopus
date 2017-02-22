@@ -156,6 +156,9 @@ after_initialize do
       #     user_record = User.find_by_username(params[:username])
       #   end
 
+      # TODO: Remove this!
+      sleep(3)
+
       operationQuery = false
       operationLink = false
       operationRefresh = false
