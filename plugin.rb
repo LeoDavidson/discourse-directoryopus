@@ -75,25 +75,11 @@ after_initialize do
         checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
         checkCodeUri.query = URI.encode_www_form(paramsAug)
 
-        # TODO: Remove this!
-        puts "--> callRemoteLinkingServer -->"
-        puts paramsAug
-        puts checkCodeUri
-
         # TODO: Find out if we need to do extra to verify the server's certificate is signed by a valid CA here.
         #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
         #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
         res = Net::HTTP.get(checkCodeUri)
-        jsonRes = JSON.parse(res, { :symbolize_names=>true })
-
-        # TODO: Remove this!
-        puts "<-- callRemoteLinkingServer <--"
-        puts res
-        puts jsonRes
-        STDOUT.flush
-        sleep(2)
-
-        return jsonRes
+        return JSON.parse(res, { :symbolize_names=>true })
       rescue
         return false
       end
@@ -308,11 +294,9 @@ after_initialize do
         if jsonRemoteResult[:linkId].blank?       || (!(jsonRemoteResult[:linkId].is_a? String)) ||
            jsonRemoteResult[:type].blank?         || (!(jsonRemoteResult[:type].is_a? String))   ||
            (!jsonRemoteResult.has_key?(:version)) || (!(jsonRemoteResult[:version].is_a? Numeric))
-          puts "Bad 1"
           resultBad = true
         end
       elsif remoteStatusLower != "invalid"
-        puts "Bad 2"
         resultBad = true
       end
 
@@ -330,15 +314,11 @@ after_initialize do
         return render json: userLinkDetails
       end
 
-puts "---save---"
-
       # Save our version of the new data.
       if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId]))
         userLinkDetails[:remote_error] = "Failed to update database. Please notify an admin via private message."
         return render json: userLinkDetails
       end
-
-puts "---re-get---"
 
       # Get our view of the new data back out again, rather than update the object we had.
       # Doing it this way is easier, and will show problems sooner if the round-trip didn't actually work.
@@ -346,8 +326,6 @@ puts "---re-get---"
       if (userLinkDetails.blank?)
         return render_json_error("Error re-obtaining account linking details. Please notify an admin via private message.")
       end
-
-puts "---augment---"
 
       # Augment the returned data if we have some extras from the server.
       if remoteStatusLower == "linked"
@@ -358,8 +336,6 @@ puts "---augment---"
          userLinkDetails[:link_reg_date] = jsonRemoteResult[:regDate]
         end
       end
-
-puts "---final render---"
 
       return render json: userLinkDetails
 
