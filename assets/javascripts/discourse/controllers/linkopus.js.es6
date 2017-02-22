@@ -115,6 +115,11 @@ export default Ember.Controller.extend({
 			this.set("opuslinkLoadResult.remote_error", null);
 			this.set("opuslinkRegCodeExample", false);
 			this.startLinkQuery("link", regCode);
+		},
+		
+		// TODO: Remove this once done testing.
+		onOpusLinkClearLocal() {
+			this.startLinkQuery("clearlocal");
 		}
 	},
 });

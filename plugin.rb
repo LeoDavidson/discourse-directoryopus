@@ -72,34 +72,23 @@ after_initialize do
         paramsAug[:action] = action
         paramsAug[SiteSetting.directoryopus_account_link_code_name.to_sym] = SiteSetting.directoryopus_account_link_code_code
 
-        # TODO: Remove this!
-        puts "--> callRemoteLinkingServer -->"
-        puts paramsAug
-        STDOUT.flush
-
         checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
         checkCodeUri.query = URI.encode_www_form(paramsAug)
 
         # TODO: Remove this!
-        puts "--> callRemoteLinkingServer --> (uri)"
+        puts "--> callRemoteLinkingServer -->"
+        puts paramsAug
         puts checkCodeUri
-        STDOUT.flush
-        sleep(2)
 
         # TODO: Find out if we need to do extra to verify the server's certificate is signed by a valid CA here.
         #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
         #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
         res = Net::HTTP.get(checkCodeUri)
-
-        # TODO: Remove this!
-        puts "<-- callRemoteLinkingServer <-- (raw)"
-        puts res
-        STDOUT.flush
-
         jsonRes = JSON.parse(res, { :symbolize_names=>true })
 
         # TODO: Remove this!
         puts "<-- callRemoteLinkingServer <--"
+        puts res
         puts jsonRes
         STDOUT.flush
         sleep(2)
@@ -120,11 +109,13 @@ after_initialize do
       return false if (link_status.blank? || !(link_status.is_a? String))
       statusLower = link_status.downcase
       if (statusLower.blank? || statusLower == "invalid")
-        u.custom_fields["directoryopus_link_status"] = false
-        u.custom_fields["directoryopus_link_last_refreshed"] = nil
-        u.custom_fields["directoryopus_link_version"] = nil
-        u.custom_fields["directoryopus_link_edition"] = nil
-        u.custom_fields["directoryopus_link_id"] = nil
+        # Must delete the values. Setting them to false or nil has no effect as they get merged or something.
+        # Maybe false works but setting some to nil made the save fail? Not sure. Anyway, deleting saves space.
+        u.custom_fields.delete("directoryopus_link_status")
+        u.custom_fields.delete("directoryopus_link_last_refreshed")
+        u.custom_fields.delete("directoryopus_link_version")
+        u.custom_fields.delete("directoryopus_link_edition")
+        u.custom_fields.delete("directoryopus_link_id")
       elsif (statusLower == "linked" && !link_id.blank?)
         u.custom_fields["directoryopus_link_status"] = true
         u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
@@ -140,6 +131,7 @@ after_initialize do
       return true
     end
 
+    # ActionView::Helpers::DateHelper
     def getUserLinkData(user)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
@@ -153,11 +145,16 @@ after_initialize do
           :link_status => false
         }
       else
+        refresh_time_distance = ""
+        timeThenUTC = u.custom_fields["directoryopus_link_last_refreshed"]
+        if !timeThenUTC.blank?
+          refresh_time_distance = view_context.distance_of_time_in_words(
+            Time.now.utc, timeThenUTC,
+            { :scope => :'datetime.distance_in_words_verbose' })
+        end
         return {
           :link_status => true,
-          :link_last_refreshed => helper.distance_of_time_in_words(Time.now.utc,
-                                      u.custom_fields["directoryopus_link_last_refreshed"],
-                                      { :scope => :'datetime.distance_in_words_verbose' }),
+          :link_last_refreshed => refresh_time_distance,
           :link_version => u.custom_fields["directoryopus_link_version"],
           :link_edition => u.custom_fields["directoryopus_link_edition"],
           :link_id => u.custom_fields["directoryopus_link_id"]
@@ -177,17 +174,20 @@ after_initialize do
       operationQuery = false
       operationLink = false
       operationRefresh = false
+      operationClearLocal = false
 
       if params.has_key?(:operation)
         operation = params[:operation]
         if !operation.is_a? String
           return render_json_error("Invalid operation.")
         end
-        oplower = operation.downcase
-        if oplower == "link"
+        opLower = operation.downcase
+        if opLower == "link"
           operationLink = true
         elsif opLower == "refresh"
           operationRefresh = true
+        elsif opLower == "clearlocal" # TODO: Remove this once done testing.
+          operationClearLocal = true
         elsif opLower != "query"
           # operationQuery is set later on, not here.
           return render_json_error("Invalid operation.")
@@ -219,6 +219,12 @@ after_initialize do
       userLinkDetails = getUserLinkData(user_record)
       if (userLinkDetails.blank?)
         return render_json_error("Error obtaining account linking details. Please notify an admin via private message.")
+      end
+
+      if (operationClearLocal) # TODO: Remove this once done testing.
+	      setUserLinkData(user_record, "invalid", nil, nil, nil)
+	      userLinkDetails = getUserLinkData(user_record)
+          return render json: userLinkDetails
       end
 
       # If we are just querying things, we can return the state immediately.
@@ -299,12 +305,14 @@ after_initialize do
       resultBad = false
 
       if remoteStatusLower == "linked"
-        if jsonRemoteResult[:linkId].blank?  || (!(jsonRemoteResult[:linkId].is_a? String)) ||
-           jsonRemoteResult[:type].blank?    || (!(jsonRemoteResult[:type].is_a? String))   ||
-           jsonRemoteResult[:version].blank? || (!(jsonRemoteResult[:version].is_a? String))
+        if jsonRemoteResult[:linkId].blank?       || (!(jsonRemoteResult[:linkId].is_a? String)) ||
+           jsonRemoteResult[:type].blank?         || (!(jsonRemoteResult[:type].is_a? String))   ||
+           (!jsonRemoteResult.has_key?(:version)) || (!(jsonRemoteResult[:version].is_a? Numeric))
+          puts "Bad 1"
           resultBad = true
         end
       elsif remoteStatusLower != "invalid"
+        puts "Bad 2"
         resultBad = true
       end
 
@@ -322,11 +330,15 @@ after_initialize do
         return render json: userLinkDetails
       end
 
+puts "---save---"
+
       # Save our version of the new data.
       if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId]))
         userLinkDetails[:remote_error] = "Failed to update database. Please notify an admin via private message."
         return render json: userLinkDetails
       end
+
+puts "---re-get---"
 
       # Get our view of the new data back out again, rather than update the object we had.
       # Doing it this way is easier, and will show problems sooner if the round-trip didn't actually work.
@@ -334,6 +346,8 @@ after_initialize do
       if (userLinkDetails.blank?)
         return render_json_error("Error re-obtaining account linking details. Please notify an admin via private message.")
       end
+
+puts "---augment---"
 
       # Augment the returned data if we have some extras from the server.
       if remoteStatusLower == "linked"
@@ -344,6 +358,8 @@ after_initialize do
          userLinkDetails[:link_reg_date] = jsonRemoteResult[:regDate]
         end
       end
+
+puts "---final render---"
 
       return render json: userLinkDetails
 
