@@ -10,6 +10,8 @@ register_asset 'stylesheets/directoryopus.scss'
 
 require 'net/http'
 require 'json'
+# require 'openssl'
+# require 'base64'
 
 after_initialize do
 
@@ -69,13 +71,40 @@ after_initialize do
         paramsAug = params.clone
         paramsAug[:action] = action
         paramsAug[SiteSetting.directoryopus_account_link_code_name.to_sym] = SiteSetting.directoryopus_account_link_code_code
+
+        # TODO: Remove this!
+        puts "--> callRemoteLinkingServer -->"
+        puts paramsAug
+        STDOUT.flush
+
         checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
-        checkCodeUri.query = URI.encode_www_form(checkCodeParams)
+        checkCodeUri.query = URI.encode_www_form(paramsAug)
+
+        # TODO: Remove this!
+        puts "--> callRemoteLinkingServer --> (uri)"
+        puts checkCodeUri
+        STDOUT.flush
+        sleep(2)
+
         # TODO: Find out if we need to do extra to verify the server's certificate is signed by a valid CA here.
         #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
         #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
-        res = Net::HTTP.get(checkCodeuri)
-        return JSON.parse(res)
+        res = Net::HTTP.get(checkCodeUri)
+
+        # TODO: Remove this!
+        puts "<-- callRemoteLinkingServer <-- (raw)"
+        puts res
+        STDOUT.flush
+
+        jsonRes = JSON.parse(res, { :symbolize_names=>true })
+
+        # TODO: Remove this!
+        puts "<-- callRemoteLinkingServer <--"
+        puts jsonRes
+        STDOUT.flush
+        sleep(2)
+
+        return jsonRes
       rescue
         return false
       end
@@ -144,9 +173,6 @@ after_initialize do
       #   if params.has_key?(:username)
       #     user_record = User.find_by_username(params[:username])
       #   end
-
-      # TODO: Remove this!
-      sleep(3)
 
       operationQuery = false
       operationLink = false
@@ -244,7 +270,7 @@ after_initialize do
         #       After too many failures, block them from being able to link at all and notify all admins.
         #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
 
-        jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :test => 1 } )
+        jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :test => 1 } )
 
         if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
           remoteStatusLower = "error"
@@ -253,7 +279,7 @@ after_initialize do
         end
 
         if remoteStatusLower == "invalid"
-          userLinkDetails[:remote_error] = "Invalid registration code. See notes below."
+          userLinkDetails[:remote_error] = "Invalid registration code."
           return render json: userLinkDetails
         elsif remoteStatusLower == "used"
           # TODO: Handle situation where account is already linked, and it looks like it was linked to this account
