@@ -151,6 +151,17 @@ after_initialize do
     end
 
     def index
+      res = indexMain(params)
+      if (res.is_a? String)
+        return render_json_error(res)
+      elsif (res.is_a? Hash)
+        res.delete(:link_id) # The link_id is not really secret but there is no reason to send it to the client.
+        return render json: res
+      end
+      return render_json_error("Unexpected result type. Please notify an admin via private message.")
+    end
+
+    def indexMain(params)
 
       # We'll be called via "/user/<username>/link-opus.json?user_id=<user_id>"
       # That gives us both the name and id. The name is only there so the non-json URL in the browser is nicer.
@@ -167,7 +178,7 @@ after_initialize do
       if params.has_key?(:operation)
         operation = params[:operation]
         if !operation.is_a? String
-          return render_json_error("Invalid operation.")
+          return "Invalid operation."
         end
         opLower = operation.downcase
         if opLower == "link"
@@ -178,7 +189,7 @@ after_initialize do
           operationClearLocal = true
         elsif opLower != "query"
           # operationQuery is set later on, not here.
-          return render_json_error("Invalid operation.")
+          return "Invalid operation."
         end
       end
 
@@ -192,12 +203,12 @@ after_initialize do
       end
 
       if user_record.blank?
-        return render_json_error("Invalid user_id")
+        return "Invalid user_id"
       end
 
       if (operationLink || operationRefresh)
         if (user_record.id != current_user.id && !current_user.admin?)
-          return render_json_error("You may only manage account-linking information for your own account.")
+          return "You may only manage account-linking information for your own account."
         end
       else
         operationQuery = true
@@ -206,24 +217,24 @@ after_initialize do
       # Get our own local idea of the account's current state.
       userLinkDetails = getUserLinkData(user_record)
       if (userLinkDetails.blank?)
-        return render_json_error("Error obtaining account linking details. Please notify an admin via private message.")
+        return "Error obtaining account linking details. Please notify an admin via private message."
       end
 
       if (operationClearLocal) # TODO: Remove this once done testing.
-	      setUserLinkData(user_record, "invalid", nil, nil, nil)
-	      userLinkDetails = getUserLinkData(user_record)
-          return render json: userLinkDetails
+          setUserLinkData(user_record, "invalid", nil, nil, nil)
+          userLinkDetails = getUserLinkData(user_record)
+          return userLinkDetails
       end
 
       # If we are just querying things, we can return the state immediately.
       if operationQuery
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       # If the forum is in read-only mode then we can't change anything.
       if Discourse.readonly_mode?
         userLinkDetails[:remote_error] = I18n.t('read_only_mode_enabled')
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       jsonRemoteResult = nil
@@ -234,7 +245,7 @@ after_initialize do
 
         if (link_id.blank?)
           # If we are refreshing, and there is no link_id, then we're done as the details are unchanged.
-          return render json: userLinkDetails
+          return userLinkDetails
         end
 
         jsonRemoteResult = callRemoteLinkingServer("FailOnPurpose_check", { :linkId => link_id } )
@@ -250,14 +261,14 @@ after_initialize do
         if (!link_id.blank?)
           # If we are linking, there can't already be linked. Either the UI is confused or someone's sending bogus requests.
           userLinkDetails[:remote_error] = "Account is already linked. Please notify an admin via private message."
-          return render json: userLinkDetails
+          return userLinkDetails
         end
 
         regCode = params[:reg_code]
         # The client should have processed the reg code into the correct case and format, so our regex is strict here.
         if (regCode.blank? || (!(regCode.is_a? String)) || regCode !~ /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/)
           userLinkDetails[:remote_error] = "RC param invalid. Please notify an admin via private message."
-          return render json: userLinkDetails
+          return userLinkDetails
         end
 
         # TODO: Throttle the requests so they can't brute-force a reg code.
@@ -283,7 +294,7 @@ after_initialize do
 
           if remoteStatusLower == "invalid"
             userLinkDetails[:remote_error] = "Invalid registration code."
-            return render json: userLinkDetails
+            return userLinkDetails
           elsif remoteStatusLower == "used"
             # Handle situation where account is already linked, and it looks like it was linked to this account
             # but we failed to record the fact on our side. e.g. Read-only mode, power failure, transaction failure after
@@ -305,7 +316,7 @@ after_initialize do
             if !takeOwnership
               # OK, it is used for real, so return a simple error.
               userLinkDetails[:remote_error] = "That registration code is already linked to another account."
-              return render json: userLinkDetails
+              return userLinkDetails
             end
           end
           
@@ -316,7 +327,7 @@ after_initialize do
 
       if remoteStatusLower == "error"
         userLinkDetails[:remote_error] = "Request failed. Please try later. If the problem persists, please notify an admin via private message."
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       resultBad = false
@@ -333,7 +344,7 @@ after_initialize do
 
       if resultBad
         userLinkDetails[:remote_error] = "Invalid result from server. Please notify an admin via private message."
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       # Test read-only mode a second time, as the request to the remote server could have taken a while.
@@ -342,20 +353,20 @@ after_initialize do
       # We have to handle that situation anyway as there are other ways it can happen, not just read-only turning on.
       if Discourse.readonly_mode?
         userLinkDetails[:remote_error] = I18n.t('read_only_mode_enabled')
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       # Save our version of the new data.
       if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId]))
         userLinkDetails[:remote_error] = "Failed to update database. Please notify an admin via private message."
-        return render json: userLinkDetails
+        return userLinkDetails
       end
 
       # Get our view of the new data back out again, rather than update the object we had.
       # Doing it this way is easier, and will show problems sooner if the round-trip didn't actually work.
       userLinkDetails = getUserLinkData(user_record)
       if (userLinkDetails.blank?)
-        return render_json_error("Error re-obtaining account linking details. Please notify an admin via private message.")
+        return "Error re-obtaining account linking details. Please notify an admin via private message."
       end
 
       # Augment the returned data if we have some extras from the server.
@@ -368,7 +379,7 @@ after_initialize do
         end
       end
 
-      return render json: userLinkDetails
+      return userLinkDetails
 
     end
 

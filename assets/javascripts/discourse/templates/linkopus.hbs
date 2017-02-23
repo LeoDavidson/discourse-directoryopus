@@ -12,7 +12,18 @@
 			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
 		{{else if opuslinkLoadResult}}
 			{{#if opuslinkLoadResult.link_status}}
-				<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_status.link_version}} {{opuslinkLoadResult.link_status.link_edition}} user.</span></p>
+				<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_version}} {{opuslinkLoadResult.link_edition}} user.</span></p>
+
+				{{#if opuslinkLoadResult.link_last_refreshed}}
+					<p>Last Refreshed: {{opuslinkLoadResult.link_last_refreshed}}</p>
+				{{/if}}
+				{{#if opuslinkLoadResult.link_reg_code_redacted}}
+					<p>Registration Code: {{opuslinkLoadResult.link_reg_code_redacted}}</p>
+				{{/if}}
+				{{#if opuslinkLoadResult.link_reg_date}}
+					<p>Registration Date: {{opuslinkLoadResult.link_reg_date}}</p>
+				{{/if}}
+
 				<p>(Button: Refresh / More Details)</p>
 				{{#if opuslinkAjaxPending}}
 					<p class="directoryopus-link-loading">...Please Wait...</p>
