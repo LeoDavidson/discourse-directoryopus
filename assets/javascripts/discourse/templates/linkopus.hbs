@@ -3,7 +3,7 @@
 	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> <span class="directoryopus-link-headingtext">Directory&nbsp;Opus - Account&nbsp;Linking</span></h1>
 
 	{{#if model}}
-		<p><button {{action "onOpusLinkClearLocal"}} class="btn opus-link" title="Clear Local">Clear Local (TODO: Remove This Button)</button></p>
+		<p><button {{action "onOpusLinkClearLocal"}} class="btn" title="Clear Local">Clear Local (TODO: Remove This Button)</button></p>
 
 		{{#if opuslinkLoadError}}
 			{{#if opuslinkAjaxPending}}
@@ -12,19 +12,21 @@
 			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
 		{{else if opuslinkLoadResult}}
 			{{#if opuslinkLoadResult.link_status}}
-				<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <b>linked</b>:</span> <span class="directoryopus-link-linkversion">Registered Directory Opus {{opuslinkLoadResult.link_version}} {{opuslinkLoadResult.link_edition}} user.</span></p>
-
-				{{#if opuslinkLoadResult.link_last_refreshed}}
-					<p>Last Refreshed: {{opuslinkLoadResult.link_last_refreshed}}</p>
-				{{/if}}
+				<div class="directoryopus-link-statrefdiv">
+					<p class="directoryopus-link-linked"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{opuslinkLoadResult.link_version}}</span> <span class="{{opuslinkLoadResult.link_edition_class}}">{{opuslinkLoadResult.link_edition}}</span> user.</span></p>
+					<div class="directoryopus-link-butref">
+						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} class="btn btn-primary" title="Refresh / Details">Refresh / Details</button></p>
+						{{#if opuslinkLoadResult.link_last_refreshed}}
+							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last Refreshed:</span> <span class="directoryopus-nowrap">{{opuslinkLoadResult.link_last_refreshed}}</span></p>
+						{{/if}}
+					</div>
+				</div>
 				{{#if opuslinkLoadResult.link_reg_code_redacted}}
 					<p>Registration Code: {{opuslinkLoadResult.link_reg_code_redacted}}</p>
 				{{/if}}
 				{{#if opuslinkLoadResult.link_reg_date}}
 					<p>Registration Date: {{opuslinkLoadResult.link_reg_date}}</p>
 				{{/if}}
-
-				<p>(Button: Refresh / More Details)</p>
 				{{#if opuslinkAjaxPending}}
 					<p class="directoryopus-link-loading">...Please Wait...</p>
 				{{/if}}
@@ -37,7 +39,7 @@
 				<form class="directoryopus-link-form">
 					<div class="directoryopus-link-inputs">
 						<label>Directory Opus registration code: {{input enter="onOpusLinkSubmitRegCode" value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off" required="true"}}</label>
-						<button {{action "onOpusLinkSubmitRegCode"}} class="btn btn-primary opus-link" title="Submit">Submit</button>
+						<button {{action "onOpusLinkSubmitRegCode"}} class="btn btn-primary" title="Submit">Submit</button>
 					</div>
 					{{#if opuslinkAjaxPending}}
 						<p class="directoryopus-link-loading">...Please Wait...</p>

@@ -6,6 +6,10 @@
 	background-position: 0.5em center;
 }
 
+.directoryopus-nowrap {
+	white-space: nowrap;
+}
+
 .directoryopus-link-status {
 	display: inline-block;
 	.opus-nav-pills {
@@ -132,6 +136,73 @@
 			font-weight: bold;
 			margin-right: 0.25em;
 		}
+	}
+	.directoryopus-link-statrefdiv {
+		display: inline-block;
+		.directoryopus-link-butref {
+			display: flex;
+		}
+	}
+	.directoryopus-link-refresh {
+		float: left;
+		margin-top: 5px;
+	}
+	.directoryopus-link-lastrefresh {
+		text-align: right;
+		font-size: 0.9em;
+		font-style: italic;
+		margin: 0 0 0 auto;
+	}
+	.directoryopus-link-linkheading {
+		.directoryopus-link-linkstatus {
+			font-weight: bold;
+			font-size: 1.025em;
+			color: #ffffff;
+		}
+	}
+	.directoryopus-link-versionsummary {
+		font-style: italic;
+		.directoryopus-link-program {
+			margin-left: 1px;
+			font-weight: bold;
+			font-size: 1.125em;
+			color: #ffffff;
+			text-shadow: 0px 1px 3px #052c73;
+		}
+		.directoryopus-link-version {
+			margin: 0px 0.1em;
+			font-weight: bold;
+			font-size: 1.125em;
+			color: #ffffff;
+			text-shadow: 0px 1px 3px #052c73;
+		}
+		.directoryopus-link-edition {
+			font-weight: bold;
+			font-size: 1.125em;
+			color: #ffffff;
+			text-shadow: 0px 1px 3px #052c73;
+		}
+		.directoryopus-link-edition-pro {
+			font-weight: bold;
+			font-size: 1.125em;
+			color: #f5ce6d;
+			text-shadow: 0px 1px 2px #231a05;
+		}
+		.directoryopus-link-edition-light {
+		    margin-right: 1px;
+			font-weight: bold;
+			font-size: 1.125em;
+			color: #ffffff;
+			text-shadow: 0px 1px 3px #c394bf;
+		}
+	}
+	.directoryopus-link-linked {
+		border: 1px solid #6faf96;
+		display: inline-block;
+		padding: 1em;
+		margin-bottom: 0;
+		background-color: #34cc00;
+		color: #ffffff;
 	}
 	.directoryopus-link-unlinked {
 		border: 1px solid $quaternary;

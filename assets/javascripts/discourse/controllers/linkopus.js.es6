@@ -19,11 +19,12 @@ export default Ember.Controller.extend({
 
 		if (window.location.protocol !== "https:" && Discourse.Environment !== "development") {
 			this.set("opuslinkLoadError", "Submission over http:// is not secure. Please use the site's https:// URL");
+			this.set("opuslinkLoadResult", null); // Should be redundant.
 			return;
 		}
 
 		const userModel = this.get("model");
-		if (typeof userModel === "undefined") {
+		if (typeof userModel === "undefined" || userModel === null) {
 			return;
 		}
 		const username = userModel.get("username");
@@ -53,6 +54,17 @@ export default Ember.Controller.extend({
 	},
 
 	onLinkQuerySuccess(jsonResult) {
+		if (typeof jsonResult["link_edition"] === "string" && jsonResult["link_edition"].toLowerCase() === "pro") {
+			jsonResult["link_edition"] = "Pro"; // For the capital letter.
+			jsonResult["link_edition_class"] = "directoryopus-link-edition-pro";
+		}
+		else if (typeof jsonResult["link_edition"] === "string" && jsonResult["link_edition"].toLowerCase() === "light") {
+			jsonResult["link_edition"] = "Light"; // For the capital letter.
+			jsonResult["link_edition_class"] = "directoryopus-link-edition-light";
+		}
+		else {
+			jsonResult["link_edition_class"] = "directoryopus-link-edition";
+		}
 		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", null);
 		this.set("opuslinkLoadResult", jsonResult);
@@ -89,34 +101,51 @@ export default Ember.Controller.extend({
 		}
 		return true;
 	},
+
+	setErrorMessage(errMsg) {
+		// Note that we are sometimes called with errMsg null to clear both messages.
+		const existingRes = this.get("opuslinkLoadResult");
+		if (typeof existingRes === "undefined" || existingRes === null) {
+			this.set("opuslinkLoadError", errMsg);
+		}
+		else {
+			this.set("opuslinkLoadResult.remote_error", errMsg);
+			this.set("opuslinkLoadError", null);
+		}
+	},
 	
 	actions: {
 		onOpusLinkSubmitRegCode() {
 			if (this.get("opuslinkAjaxPending")) {
 				return;
 			}
+			
 			const regCode = this.getRegCode();
 			if (regCode === "") {
-				this.set("opuslinkLoadResult.remote_error", "You must enter a registration code.");
+				this.setErrorMessage("You must enter a registration code.");
 				this.set("opuslinkRegCodeExample", true);
 				return;
 			}
 			if (!this.validateRegCode(regCode)) {
-				this.set("opuslinkLoadResult.remote_error", "\"" + regCode + "\" is not the correct format for a registration code.");
+				this.setErrorMessage("\"" + regCode + "\" is not the correct format for a registration code.");
 				this.set("opuslinkRegCodeExample", true);
 				return;
 			}
 			if (regCode === "ABC12-DE3FG-4HIJ5-KL6M7") {
-				this.set("opuslinkLoadResult.remote_error", "You can't use the example registration code. It's just an example. Don't be silly.");
+				this.setErrorMessage("You can't use the example registration code. It's just an example. Don't be silly.");
 				this.set("opuslinkRegCodeExample", false);
 				return;
 			}
+			this.setErrorMessage(null);
 			this.set("opuslinkRegCodeShowMe", false); // So the video doesn't re-appear if there's an error after the ajax call.
-			this.set("opuslinkLoadResult.remote_error", null);
 			this.set("opuslinkRegCodeExample", false);
 			this.startLinkQuery("link", regCode);
 		},
 		
+		onOpusLinkRefresh() {
+			this.startLinkQuery("refresh");
+		},
+
 		// TODO: Remove this once done testing.
 		onOpusLinkClearLocal() {
 			this.startLinkQuery("clearlocal");
