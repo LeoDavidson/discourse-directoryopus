@@ -95,6 +95,20 @@
 			padding: 6px 10px;
 		}
 	}
+	.btn:not(.btn-small) {
+		padding: 6px 10px 6px 7px;
+		&[disabled], &.disabled {
+			opacity: initial;
+			background: #016090;
+			color: white;
+		}
+		.fa.fa-fw {
+			margin: initial;
+		}
+	}
+	.directoryopus-inlineblock {
+		display: inline-block;
+	}
 	.directoryopus-link-noaccount {
 		background-color: rgba($quaternary, 0.17);
 		margin: 0 -1em 0 -1em;
@@ -141,9 +155,6 @@
 		display: inline-block;
 		.directoryopus-link-butref {
 			display: flex;
-		}
-		.directoryopus-link-loading, .directoryopus-link-loaderror {
-			margin-bottom: 0;
 		}
 	}
 	.directoryopus-link-refresh {
@@ -238,6 +249,7 @@
 	}
 	button.btn {
 		vertical-align: middle;
+		white-space: nowrap;
 	}
 	input, button {
 		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
