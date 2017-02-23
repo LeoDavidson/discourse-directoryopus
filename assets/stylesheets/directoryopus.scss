@@ -53,9 +53,20 @@
 	}
 }
 
-.body-page.directoryopus-link-body {
-	width: initial;
-	padding-bottom: 2em;
+.directoryopus-link-body {
+	/* Bits of this copied from Discourse's body-page class.
+	   Aiming for a consistent look with e.g. the FAQs page while
+	   keeping our stylesheet isolated/independent to avoid surprises. */
+	padding-left: 20px;
+	padding-right: 20px;
+	blockquote, h1, h2, h3, hr, p, pre, ul, ol, table {
+		margin: 0 0 20px;
+		font-size: 1.143em;
+		line-height: 22px;
+	}
+	li {
+		margin-bottom: 8px;
+    }
 	h1 {
 		color: $tertiary;
 		margin: 1.5em 0 1em;
@@ -146,6 +157,13 @@
 	}
 	button.btn {
 		vertical-align: middle;
+	}
+	input, button {
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	}
+	label {
+		font-size: 0.929em;
+		font-weight: normal;
 	}
 	label {
 		color: $tertiary;
