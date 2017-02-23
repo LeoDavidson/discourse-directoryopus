@@ -65,7 +65,6 @@ after_initialize do
       end
     end
 
-    # callRemoteLinkingServer("echo", { :hello => "moo Hello", :there => "cow" } )
     def callRemoteLinkingServer(action, params)
       begin
         paramsAug = params.clone
@@ -79,7 +78,10 @@ after_initialize do
         #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
         #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
         res = Net::HTTP.get(checkCodeUri)
-        return JSON.parse(res, { :symbolize_names=>true })
+        jsonRes = JSON.parse(res, { :symbolize_names=>true })
+        puts("--> #{checkCodeUri}") # TODO: Remove this.
+        puts("<-- #{jsonRes}") # TODO: Remove this.
+        return jsonRes
       rescue
         return false
       end
@@ -95,15 +97,12 @@ after_initialize do
       return false if (link_status.blank? || !(link_status.is_a? String))
       statusLower = link_status.downcase
       if (statusLower.blank? || statusLower == "invalid")
-        # Must delete the values. Setting them to false or nil has no effect as they get merged or something.
-        # Maybe false works but setting some to nil made the save fail? Not sure. Anyway, deleting saves space.
-        u.custom_fields.delete("directoryopus_link_status")
+        # Must delete the values. Not sure setting them to nil etc. works. Deleting is better anyway.
         u.custom_fields.delete("directoryopus_link_last_refreshed")
         u.custom_fields.delete("directoryopus_link_version")
         u.custom_fields.delete("directoryopus_link_edition")
         u.custom_fields.delete("directoryopus_link_id")
       elsif (statusLower == "linked" && !link_id.blank?)
-        u.custom_fields["directoryopus_link_status"] = true
         u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
         u.custom_fields["directoryopus_link_version"] = link_version
         u.custom_fields["directoryopus_link_edition"] = link_edition
@@ -119,14 +118,17 @@ after_initialize do
 
     # ActionView::Helpers::DateHelper
     def getUserLinkData(user)
+      # TODO: Faster: User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"]) )
+      #       If user_id=3 => {3=>{"directoryopus_link_last_refreshed"=>"2017-02-22 23:28:41 UTC", "directoryopus_link_version"=>"12", "directoryopus_link_edition"=>"light", "directoryopus_link_id"=>"xxxxxxxxxxxxxxxx_leo"}}
+      #       Or {} if nothing found at all.
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
         u = user
       end
       return false if u.blank?
-      link_status = u.custom_fields["directoryopus_link_status"]
-      if (link_status.blank?)
+      link_id = u.custom_fields["directoryopus_link_id"]
+      if (link_id.blank?)
         return {
           :link_status => false
         }
@@ -143,7 +145,7 @@ after_initialize do
           :link_last_refreshed => refresh_time_distance,
           :link_version => u.custom_fields["directoryopus_link_version"],
           :link_edition => u.custom_fields["directoryopus_link_edition"],
-          :link_id => u.custom_fields["directoryopus_link_id"]
+          :link_id => link_id
         }
       end
     end
@@ -262,24 +264,53 @@ after_initialize do
         #       After too many failures, block them from being able to link at all and notify all admins.
         #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
 
-        jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :test => 1 } )
+        takeOwnership = false
+        takeOwnershipDoneOnce = false
+        loop do
+ 
+          jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :force => (takeOwnership ? 1 : 0) } )
 
-        if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
-          remoteStatusLower = "error"
-        else
-          remoteStatusLower = jsonRemoteResult[:status].downcase
+          if takeOwnership
+            takeOwnership = false
+            takeOwnershipDoneOnce = true
+          end
+
+          if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
+            remoteStatusLower = "error"
+          else
+            remoteStatusLower = jsonRemoteResult[:status].downcase
+          end
+
+          if remoteStatusLower == "invalid"
+            userLinkDetails[:remote_error] = "Invalid registration code."
+            return render json: userLinkDetails
+          elsif remoteStatusLower == "used"
+            # Handle situation where account is already linked, and it looks like it was linked to this account
+            # but we failed to record the fact on our side. e.g. Read-only mode, power failure, transaction failure after
+            # we already told the remote system to create the link. It'll think we're linked but we won't know.
+            # No other account should have the same linkId already. (So if a linked account is renamed, and remains
+            # linked, someone cannot then create an account with the old name and take over their reg code.
+            # Unlikely, but not impossible (people publicly post their codes sometimes), and simple to check.)
+            # If we *already* tried to take ownership once, give up, else we could loop forever.
+            remoteUserName = jsonRemoteResult[:link]   # What the remote database thinks is the forum username.
+            remoteLinkId   = jsonRemoteResult[:linkId] # Unique ID representing the link / row in the remote database.
+            if (!takeOwnershipDoneOnce &&
+                !(remoteUserName.blank?) && (remoteUserName.is_a? String)  &&
+                !(remoteLinkId.blank?)   && (remoteLinkId.is_a? String)    &&
+                (remoteUserName.downcase == user_record.username.downcase) &&
+                (UserCustomField.find_by(name: "directoryopus_link_id", value: remoteLinkId).blank?))
+              takeOwnership = true
+            end
+            
+            if !takeOwnership
+              # OK, it is used for real, so return a simple error.
+              userLinkDetails[:remote_error] = "That registration code is already linked to another account."
+              return render json: userLinkDetails
+            end
+          end
+          
+          break if !takeOwnership
         end
-
-        if remoteStatusLower == "invalid"
-          userLinkDetails[:remote_error] = "Invalid registration code."
-          return render json: userLinkDetails
-        elsif remoteStatusLower == "used"
-          # TODO: Handle situation where account is already linked, and it looks like it was linked to this account
-          #       but we failed to record the fact on our side. The linkid after first underscore should match our username.
-          userLinkDetails[:remote_error] = "(USED-TODO)."
-          # userLinkDetails[:remote_error] = "Invalid registration code. See notes below."
-          return render json: userLinkDetails
-	    end
 
       end
 
