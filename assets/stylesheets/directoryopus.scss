@@ -142,6 +142,9 @@
 		.directoryopus-link-butref {
 			display: flex;
 		}
+		.directoryopus-link-loading, .directoryopus-link-loaderror {
+			margin-bottom: 0;
+		}
 	}
 	.directoryopus-link-refresh {
 		float: left;
@@ -196,9 +199,16 @@
 			text-shadow: 0px 1px 3px #c394bf;
 		}
 	}
+	.directoryopus-link-linkmain {
+		padding: 0;
+		margin: 0;
+	}
+	.directoryopus-link-detailregcode {
+	}
+	.directoryopus-link-detailregdate {
+	}
 	.directoryopus-link-linked {
 		border: 1px solid #6faf96;
-		display: inline-block;
 		padding: 1em;
 		margin-bottom: 0;
 		background-color: #34cc00;

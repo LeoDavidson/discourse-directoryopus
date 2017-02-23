@@ -248,7 +248,7 @@ after_initialize do
           return userLinkDetails
         end
 
-        jsonRemoteResult = callRemoteLinkingServer("FailOnPurpose_check", { :linkId => link_id } )
+        jsonRemoteResult = callRemoteLinkingServer("check", { :linkId => link_id } )
 
         if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
           remoteStatusLower = "error"

@@ -65,6 +65,15 @@ export default Ember.Controller.extend({
 		else {
 			jsonResult["link_edition_class"] = "directoryopus-link-edition";
 		}
+		if (typeof jsonResult["link_reg_code_redacted"] === "string" || typeof jsonResult["link_reg_date"] === "string") {
+			jsonResult["link_refresh_details_title"] = "Refresh Details";
+		}
+		else {
+			jsonResult["link_refresh_details_title"] = "Load Details";
+		}
+		if (typeof jsonResult["link_reg_date"] === "string") {
+			jsonResult["link_reg_date"] = jsonResult["link_reg_date"] + " TODO: Convert this";
+		}
 		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", null);
 		this.set("opuslinkLoadResult", jsonResult);
@@ -143,6 +152,10 @@ export default Ember.Controller.extend({
 		},
 		
 		onOpusLinkRefresh() {
+			if (this.get("opuslinkAjaxPending")) {
+				return;
+			}
+			this.setErrorMessage(null);
 			this.startLinkQuery("refresh");
 		},
 
