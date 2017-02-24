@@ -6,6 +6,36 @@
 	background-position: 0.5em center;
 }
 
+.names span.directoryopus-link-poster-pro {
+	&, a {
+		color: #daa520;
+		i.fa {
+			font-size: 1.1em;
+			color: #daa520;
+		}
+	}
+}
+
+.names span.directoryopus-link-poster-light {
+	&, a {
+		color: #20bfda;
+		i.fa {
+			font-size: 1.1em;
+			color: #20bfda;
+		}
+	}
+}
+
+.names span.directoryopus-link-poster-pleaselink {
+	&, a {
+		color: #daa520;
+		i.fa {
+			font-size: 1.1em;
+			color: #daa520;
+		}
+	}
+}
+
 .directoryopus-nowrap {
 	white-space: nowrap;
 }
