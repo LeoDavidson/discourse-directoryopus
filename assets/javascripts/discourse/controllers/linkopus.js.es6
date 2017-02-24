@@ -86,7 +86,7 @@ export default Ember.Controller.extend({
 			var regDate = jsonResult["link_reg_date"];
 			var regDateParts = regDate.match(/^(\d{4})(\d{2})(\d{2})$/);
 			if (regDateParts != null && regDateParts.length == 4) {
-				var regDateDate = new Date(regDateParts[1],regDateParts[2],regDateParts[3]);
+				var regDateDate = new Date(regDateParts[1],regDateParts[2]-1,regDateParts[3]); // Month is -1 because Javascript's Date has zero-based months.
 				regDate = moment(regDateDate).format(I18n.t('dates.long_date_with_year_without_time'));
 				jsonResult["link_reg_date"] = regDate;
 			}
