@@ -110,7 +110,7 @@ after_initialize do
       else
         return false
       end
-      if (!u.save)
+      if (!u.save_custom_fields)
         return false
       end
       return true
