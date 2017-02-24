@@ -18,11 +18,13 @@ function posterIconCallback(cfs, attrs) {
 	var version = cfs.directoryopus_link_version;
 	var edition = cfs.directoryopus_link_edition;
 	if (version || edition) {
-		if (typeof version !== "string" || !/^\w+$/.test(version)) {
+		if ((new Date() - new Date(attrs.created_at)) > (1000*60*60*24*180)) {
+			version = ""; // Post is older than 180 days (~6 months); leave the user's *current* version number off as it can be misleading on old posts.
+		} else if (typeof version !== "string" || !/^\w+$/.test(version)) {
 			version = ""; // If the version isn't alphanumeric, blank it out, in case something bogus has been fed into our system. Prevents outputing it to all our users.
 		}
 		if (typeof edition !== "string") {
-			edition = "";
+			edition = ""; // Ensure it's safe to call toLowerCase.
 		}
 		edition = edition.toLowerCase();
 		var isPro = (edition === "pro");
