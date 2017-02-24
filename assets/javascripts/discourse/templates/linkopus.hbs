@@ -15,11 +15,15 @@
 				<div class="directoryopus-link-statrefdiv">
 					<div class="directoryopus-link-linked">
 						<p class="directoryopus-link-linkmain"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{opuslinkLoadResult.link_version}}</span> <span class="{{opuslinkLoadResult.link_edition_class}}">{{opuslinkLoadResult.link_edition}}</span> user.</span></p>
-						{{#if opuslinkLoadResult.link_reg_code_redacted}}
-							<p class="directoryopus-link-detailregcode">Registration Code: {{opuslinkLoadResult.link_reg_code_redacted}}</p>
-						{{/if}}
-						{{#if opuslinkLoadResult.link_reg_date}}
-							<p class="directoryopus-link-detailregdate">Registration Date: {{opuslinkLoadResult.link_reg_date}}</p>
+						{{#if opuslinkLoadResult.link_refresh_have_details}}
+							<div class="directoryopus-link-linkdetails">
+								{{#if opuslinkLoadResult.link_reg_code_redacted}}
+									<span class="directoryopus-link-detailregcode"><span class="directoryopus-link-detailheading">Registration Code:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_code_redacted}}</span></span>
+								{{/if}}
+								{{#if opuslinkLoadResult.link_reg_date}}
+									<span class="directoryopus-link-detailregdate"><span class="directoryopus-link-detailheading">Registered On:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_date}}</span></span>
+								{{/if}}
+							</div>
 						{{/if}}
 					</div>
 					<div class="directoryopus-link-butref">

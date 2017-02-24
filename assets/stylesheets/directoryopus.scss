@@ -46,10 +46,7 @@
 			height: 1.25em;
 			padding-right:  0.25em;
 			vertical-align: top;
-			filter: saturate(0.4);
 		}
-		a:hover .link-opus-button-icon { filter: saturate(0.7); }
-		a.active .link-opus-button-icon { filter: saturate(1); }
 
 		i { color: $primary; }
 		a:hover i { color: $quaternary; }
@@ -175,7 +172,6 @@
 		}
 	}
 	.directoryopus-link-versionsummary {
-		font-style: italic;
 		.directoryopus-link-program {
 			margin-left: 1px;
 			font-weight: bold;
@@ -214,9 +210,25 @@
 		padding: 0;
 		margin: 0;
 	}
-	.directoryopus-link-detailregcode {
-	}
-	.directoryopus-link-detailregdate {
+	.directoryopus-link-linkdetails {
+		display: flex;
+		padding-top: 0.75em;
+		margin-top: 0.75em;
+		border-top: 1px solid #b3e57f;
+		font-size: 0.9em;
+		.directoryopus-link-detailheading {
+			font-style: italic;
+		}
+		.directoryopus-link-detailvalue {
+			text-shadow: 0px 1px 1px #052c73;
+		}
+		.directoryopus-link-detailregcode {
+			float: left;
+			padding-right: 1.5em;
+		}
+		.directoryopus-link-detailregdate {
+			margin-left: auto;
+		}
 	}
 	.directoryopus-link-linked {
 		border: 1px solid #6faf96;

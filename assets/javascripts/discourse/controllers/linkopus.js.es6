@@ -67,12 +67,29 @@ export default Ember.Controller.extend({
 		}
 		if (typeof jsonResult["link_reg_code_redacted"] === "string" || typeof jsonResult["link_reg_date"] === "string") {
 			jsonResult["link_refresh_details_title"] = "Refresh Details";
+			jsonResult["link_refresh_have_details"] = true;
 		}
 		else {
 			jsonResult["link_refresh_details_title"] = "Load Details";
+			jsonResult["link_refresh_have_details"] = false;
+		}
+		if (typeof jsonResult["link_reg_code_redacted"] === "string") {
+			var regCodeRedacted = jsonResult["link_reg_code_redacted"];
+			// This test is to ensure the regcode doesn't contain any HTML or script code, as we will insert it raw via
+			// Ember.String.htmlSafe. htmlSafe vouches that the string is safe rather; it doesn't make the string safe.
+			if (/^[-\w\*]+$/.test(regCodeRedacted)) {
+				regCodeRedacted = regCodeRedacted.replace(/\*/g,"<i class=\"fa fa-asterisk\"></i>");
+				jsonResult["link_reg_code_redacted"] = Ember.String.htmlSafe(regCodeRedacted);
+			}
 		}
 		if (typeof jsonResult["link_reg_date"] === "string") {
-			jsonResult["link_reg_date"] = jsonResult["link_reg_date"] + " TODO: Convert this";
+			var regDate = jsonResult["link_reg_date"];
+			var regDateParts = regDate.match(/^(\d{4})(\d{2})(\d{2})$/);
+			if (regDateParts != null && regDateParts.length == 4) {
+				var regDateDate = new Date(regDateParts[1],regDateParts[2],regDateParts[3]);
+				regDate = moment(regDateDate).format(I18n.t('dates.long_date_with_year_without_time'));
+				jsonResult["link_reg_date"] = regDate;
+			}
 		}
 		this.set("opuslinkRegCodeExample", false);
 		this.set("opuslinkLoadError", null);
