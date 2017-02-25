@@ -39,15 +39,24 @@ function posterIconCallback(cfs, attrs) {
 		};
 	}
 
-	if (attrs.yours && !attrs.mobileView) {
-		return {
-			icon: "link",
-			emoji: "link",
-			className: "directoryopus-link-poster-pleaselink",
-			text: " Link your account for priority support",
-			title: "Account Linking",
-			url: "/link-opus"
-		};
+	if (!attrs.mobileView) {
+		if (attrs.yours) {
+			return {
+				icon: "link",
+				emoji: "link",
+				className: "directoryopus-link-poster-pleaselink",
+				text: " Link your account for priority support",
+				title: "Account Linking",
+				url: "/link-opus"
+			};
+		}
+		else {
+			return {
+				icon: "chain-broken",
+				className: "directoryopus-link-poster-pleaselink",
+				title: "Not linked to a Directory Opus version or registration"
+			};
+		}
 	}
 }
 

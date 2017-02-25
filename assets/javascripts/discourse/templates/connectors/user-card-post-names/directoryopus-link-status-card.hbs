@@ -1,5 +1,12 @@
 {{#if siteSettings.directoryopus_enabled}}
-    <div class="directoryopus-link-status">
-        directoryopus-link-status-card.hbs
-    </div>
+	{{#if opusLinkAnything}}
+		<div class="directoryopus-link-status">
+			{{#if opusCanLinkUser}}
+				<span class="opus-nav-pills">{{#link-to 'linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{i18n 'directoryopus.linkopus_title'}}{{/link-to}}</span>
+			{{/if}}
+			{{#if opusLinkClass}}
+				<span class="{{opusLinkClass}}">{{fa-icon opusLinkIcon}} {{opusLinkText}}</span>
+			{{/if}}
+		</div>
+	{{/if}}
 {{/if}}

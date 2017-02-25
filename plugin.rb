@@ -6,12 +6,13 @@
 
 enabled_site_setting :directoryopus_enabled
 
+# If separate stylesheets for desktop/mobile are desired, it's done like this:
+# register_asset "stylesheets/desktop/directoryopus.scss", :desktop
+# register_asset "stylesheets/mobile/directoryopus.scss", :mobile
 register_asset 'stylesheets/directoryopus.scss'
 
 require 'net/http'
 require 'json'
-# require 'openssl'
-# require 'base64'
 
 after_initialize do
 
