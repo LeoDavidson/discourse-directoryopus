@@ -116,23 +116,26 @@ after_initialize do
 
     # ActionView::Helpers::DateHelper
     def getUserLinkData(user)
-      # TODO: Faster: User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"]) )
+      return false if user.blank?
+      if (user.is_a? Numeric)
+        user_id = user
+      else
+        user_id = user.id
+      end
+
+      # Calling userObject.custom_fields["x"] is easier, but turns into a SQL request per lookup.
+      # Getting them out in a batch is more efficient:
+      #    User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"])
       #       If user_id=3 => {3=>{"directoryopus_link_last_refreshed"=>"2017-02-22 23:28:41 UTC", "directoryopus_link_version"=>"12", "directoryopus_link_edition"=>"light", "directoryopus_link_id"=>"xxxxxxxxxxxxxxxx_leo"}}
       #       Or {} if nothing found at all.
-      if (user.is_a? Numeric)
-        u = User.find_by_id(user)
-      else
-        u = user
-      end
-      return false if u.blank?
-      link_id = u.custom_fields["directoryopus_link_id"]
-      if (link_id.blank?)
+      fieldsMap = User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"])[user_id]
+      if (fieldsMap.blank?)
         return {
           :link_status => false
         }
       else
         refresh_time_distance = ""
-        timeThenUTC = u.custom_fields["directoryopus_link_last_refreshed"]
+        timeThenUTC = fieldsMap["directoryopus_link_last_refreshed"]
         if !timeThenUTC.blank?
           refresh_time_distance = view_context.distance_of_time_in_words(
             Time.now.utc, timeThenUTC,
@@ -141,9 +144,9 @@ after_initialize do
         return {
           :link_status => true,
           :link_last_refreshed => refresh_time_distance,
-          :link_version => u.custom_fields["directoryopus_link_version"],
-          :link_edition => u.custom_fields["directoryopus_link_edition"],
-          :link_id => link_id
+          :link_version => fieldsMap["directoryopus_link_version"],
+          :link_edition => fieldsMap["directoryopus_link_edition"],
+          :link_id => fieldsMap["directoryopus_link_id"]
         }
       end
     end
