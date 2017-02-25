@@ -6,32 +6,35 @@
 	background-position: 0.5em center;
 }
 
-.names span.directoryopus-link-poster-pro {
+.directoryopus-link-status .directoryopus-link-userpage-pro, .names span.directoryopus-link-poster-pro {
 	&, a {
 		color: #daa520;
 		i.fa {
 			font-size: 1.1em;
 			color: #daa520;
+			margin: 0;
 		}
 	}
 }
 
-.names span.directoryopus-link-poster-light {
+.directoryopus-link-status .directoryopus-link-userpage-light, .names span.directoryopus-link-poster-light {
 	&, a {
 		color: #20bfda;
 		i.fa {
 			font-size: 1.1em;
 			color: #20bfda;
+			margin: 0;
 		}
 	}
 }
 
-.names span.directoryopus-link-poster-pleaselink {
+.directoryopus-link-status .directoryopus-link-userpage-pleaselink, .names span.directoryopus-link-poster-pleaselink {
 	&, a {
-		color: #daa520;
+		color: #a21930;
 		i.fa {
 			font-size: 1.1em;
-			color: #daa520;
+			color: #a21930;
+			margin: 0;
 		}
 	}
 }
@@ -41,16 +44,16 @@
 }
 
 .directoryopus-link-status {
+	margin-top: 1px;
 	display: inline-block;
 	.opus-nav-pills {
 		margin-top: 5px;
 		margin-bottom: 5px;
-		display: inline-block;
 		> a {
 			text-decoration: none !important;
 			white-space: nowrap;
 			border: none;
-			padding: 5px 12px;
+			padding: 5px 12px 5px 10px;
 			color: $primary;
 			background: dark-light-diff($primary, $secondary, 90%, -65%);
 			font-size: 1.143em;

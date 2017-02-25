@@ -2,6 +2,6 @@ import dopuslib from "discourse/plugins/discourse-directoryopus/lib/directoryopu
 
 export default {
 	setupComponent(args, component) {
-		dopuslib.setupUserProfileComponent(args.model, component);
+		dopuslib.setupUserProfileComponent(args.model, component, false);
 	}
 }

@@ -1,5 +1,5 @@
 export default {
-	setupUserProfileComponent(userModel, component) {
+	setupUserProfileComponent(userModel, component, small) {
 
 		// https://meta.discourse.org/t/important-changes-to-plugin-outlets-for-ember-2-10/54136
 		// https://meta.discourse.org/t/testing-viewingself-from-plugin-outlet/57576
@@ -7,9 +7,8 @@ export default {
 		const currentUser  = Discourse.User.current();
 		const currentAdmin = !!(currentUser && currentUser.get("admin"));
 	//	const viewingAdmin = !!(userModel.get("admin"));
-		const viewingName  = userModel.get("username");
 		const viewingStaff = !!(userModel.get("staff"));
-		const viewingSelf  = !!(currentUser && (viewingName === currentUser.get("username")));
+		const viewingSelf  = !!(currentUser && (userModel.get("username") === currentUser.get("username")));
 		const canLinkUser  = viewingSelf || currentAdmin;
 		
 	//	component.set("opusViewingSelf", viewingSelf);
@@ -35,12 +34,12 @@ export default {
 
 			opusLinkClass = "directoryopus-link-userpage" + (isPro?"-pro":isLight?"-light":"");
 			opusLinkIcon = "star";
-			opusLinkText = "Registered Directory Opus " + version + (isPro?" Pro":isLight?" Light":"") + " user";
+			opusLinkText = (small?"":"Registered ") + "Directory Opus " + version + (isPro?" Pro":isLight?" Light":"") + (small?"":" user");
 		}
 		else if (!viewingStaff) {
 			opusLinkClass = "directoryopus-link-userpage-pleaselink";
 			opusLinkIcon = "chain-broken";
-			opusLinkText = "Not linked to a Directory Opus version or registration";
+			opusLinkText = "Not linked" + (small?"":" to a Directory Opus version or registration");
 		}
 
 		component.set("opusLinkClass", opusLinkClass);
