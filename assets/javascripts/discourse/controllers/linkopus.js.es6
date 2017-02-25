@@ -9,7 +9,16 @@ export default Ember.Controller.extend({
 	opuslinkLoadResult: null,
 	opuslinkRegCodeShowMe: false,
 	opuslinkRegCodeExample: false,
+	opuslinkClearSafety: true,
+	opuslinkClearIsAdmin: false,
 	opuslinkRegCodeInput: "",
+
+	initPermissions() {
+		const currentUser  = Discourse.User.current();
+		const currentAdmin = !!(currentUser && currentUser.get("admin"));
+		this.set("opuslinkClearSafety", true);
+		this.set("opuslinkClearIsAdmin", currentAdmin);
+	},
 
 	startLinkQuery(operationName, regCode) {
 
@@ -176,8 +185,11 @@ export default Ember.Controller.extend({
 			this.startLinkQuery("refresh");
 		},
 
-		// TODO: Remove this once done testing.
 		onOpusLinkClearLocal() {
+			if (this.get("opuslinkAjaxPending")) {
+				return;
+			}
+			this.setErrorMessage(null);
 			this.startLinkQuery("clearlocal");
 		}
 	},

@@ -79,10 +79,7 @@ after_initialize do
         #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
         #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
         res = Net::HTTP.get(checkCodeUri)
-        jsonRes = JSON.parse(res, { :symbolize_names=>true })
-        puts("--> #{checkCodeUri}") # TODO: Remove this.
-        puts("<-- #{jsonRes}") # TODO: Remove this.
-        return jsonRes
+        return JSON.parse(res, { :symbolize_names=>true })
       rescue
         return false
       end
@@ -186,7 +183,7 @@ after_initialize do
           operationLink = true
         elsif opLower == "refresh"
           operationRefresh = true
-        elsif opLower == "clearlocal" # TODO: Remove this once done testing.
+        elsif opLower == "clearlocal"
           operationClearLocal = true
         elsif opLower != "query"
           # operationQuery is set later on, not here.
@@ -207,7 +204,11 @@ after_initialize do
         return "Invalid user_id"
       end
 
-      if (operationLink || operationRefresh)
+      if (operationClearLocal)
+        if (!current_user.admin?)
+          return "You can't do that."
+        end
+      elsif (operationLink || operationRefresh)
         if (user_record.id != current_user.id && !current_user.admin?)
           return "You may only manage account-linking information for your own account."
         end
@@ -221,7 +222,7 @@ after_initialize do
         return "Error obtaining account linking details. Please notify an admin via private message."
       end
 
-      if (operationClearLocal) # TODO: Remove this once done testing.
+      if (operationClearLocal)
           setUserLinkData(user_record, "invalid", nil, nil, nil)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails

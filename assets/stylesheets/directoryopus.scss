@@ -100,7 +100,7 @@
 	}
 	li {
 		margin-bottom: 8px;
-    }
+	}
 	h1 {
 		color: $tertiary;
 		margin: 1.5em 0 1em;
@@ -291,6 +291,15 @@
 	.directoryopus-link-instructions {
 		font-size: 0.9em;
 		line-height: initial;
+		ol {
+			margin: 1.25em 2.25em;
+			font-size: 1em;
+			line-height: initial;
+		}
+		video {
+			border: 1px solid black;
+			margin: 0 0 0.75em 1.25em;
+		}
 	}
 	button.btn {
 		vertical-align: middle;
@@ -314,5 +323,15 @@
 		vertical-align: middle;
 		font-weight: initial;
 		line-height: initial;
+	}
+	.directoryopus-link-clear {
+		border: 2px solid red;
+		background-color: rgba(255, 0, 0, 0.05);
+		color: black;
+		padding: 1em;
+		margin: 1em;
+		display: inline-block;
+		float: right;
+		width: 25%;
 	}
 }

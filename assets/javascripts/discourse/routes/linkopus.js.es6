@@ -17,6 +17,7 @@ export default Discourse.Route.extend({
 	setupController(controller, userModel) {
 		controller.set('model', userModel);
 		if (typeof userModel !== "undefined") {
+			controller.initPermissions();
 			controller.startLinkQuery(); // Call the server to get the current state of the account.
 		}
 	},
