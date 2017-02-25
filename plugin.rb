@@ -223,6 +223,7 @@ after_initialize do
       end
 
       if (operationClearLocal)
+          # TODO: Record in admin log.
           setUserLinkData(user_record, "invalid", nil, nil, nil)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
