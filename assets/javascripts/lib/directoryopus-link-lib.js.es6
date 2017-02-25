@@ -17,6 +17,9 @@ export default {
 		var version = userModel.custom_fields && userModel.custom_fields["directoryopus_link_version"];
 		var edition = userModel.custom_fields && userModel.custom_fields["directoryopus_link_edition"];
 
+		// TODO: Work out how on earth this works.
+	//	userModel.addObserver("custom_fields", () => { alert('Observer firing'); debugger; });
+
 		var opusLinkClass = null;
 		var opusLinkIcon  = null;
 		var opusLinkText  = null;

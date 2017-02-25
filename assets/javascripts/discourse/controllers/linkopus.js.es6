@@ -63,17 +63,28 @@ export default Ember.Controller.extend({
 	},
 
 	onLinkQuerySuccess(jsonResult) {
+		var isPro = false;
+		var isLight = false;
+		var verNum = 0;
+
 		if (typeof jsonResult["link_edition"] === "string" && jsonResult["link_edition"].toLowerCase() === "pro") {
+			isPro = true;
 			jsonResult["link_edition"] = "Pro"; // For the capital letter.
 			jsonResult["link_edition_class"] = "directoryopus-link-edition-pro";
 		}
 		else if (typeof jsonResult["link_edition"] === "string" && jsonResult["link_edition"].toLowerCase() === "light") {
+			isLight = true;
 			jsonResult["link_edition"] = "Light"; // For the capital letter.
 			jsonResult["link_edition_class"] = "directoryopus-link-edition-light";
 		}
 		else {
 			jsonResult["link_edition_class"] = "directoryopus-link-edition";
 		}
+
+		if (typeof jsonResult["link_version"] === "string") {
+			verNum = parseInt(jsonResult["link_version"], 10);
+		}
+
 		if (typeof jsonResult["link_reg_code_redacted"] === "string" || typeof jsonResult["link_reg_date"] === "string") {
 			jsonResult["link_refresh_details_title"] = "Refresh Details";
 			jsonResult["link_refresh_have_details"] = true;
@@ -82,6 +93,34 @@ export default Ember.Controller.extend({
 			jsonResult["link_refresh_details_title"] = "Load Details";
 			jsonResult["link_refresh_have_details"] = false;
 		}
+		
+		var needRefresh = false;
+
+		if (isPro || isLight || verNum > 0) {
+			const userModel = this.get("model");
+			if (typeof userModel !== "undefined" && userModel !== null) {
+				if (!userModel.custom_fields) {
+					needRefresh = true;
+				}
+				else {
+					if (!needRefresh && (isPro || isLight)) {
+						const newVal = isPro ? "pro" : "light";
+						const oldVal = userModel.custom_fields["directoryopus_link_edition"];
+						if (oldVal !== newVal) {
+							needRefresh = true;
+						}
+					}
+					if (!needRefresh && (verNum > 0)) {
+						const newVal = verNum.toString();
+						const oldVal = userModel.custom_fields["directoryopus_link_version"];
+						if (oldVal !== newVal) {
+							needRefresh = true;
+						}
+					}
+				}
+			}
+		}
+		
 		if (typeof jsonResult["link_reg_code_redacted"] === "string") {
 			var regCodeRedacted = jsonResult["link_reg_code_redacted"];
 			// This test is to ensure the regcode doesn't contain any HTML or script code, as we will insert it raw via
@@ -104,6 +143,13 @@ export default Ember.Controller.extend({
 		this.set("opuslinkLoadError", null);
 		this.set("opuslinkLoadResult", jsonResult);
 		this.set("opuslinkAjaxPending",false);
+		
+		if (needRefresh) {
+			// TODO: It'd be nice if we can avoid the nuclear option of reloading the whole page/app just to update userModel.custom_fields.
+			//       But I can't work out a way to do it. Specifically when the user was loaded with no custom fields, custom_fields is null
+			//       rather than just empty, and I can't work out what to create in its place. We also need to tell other templates to update.
+			window.location.reload(true);
+		}
 	},
 
 	onLinkQueryFailure(ajaxError) {
