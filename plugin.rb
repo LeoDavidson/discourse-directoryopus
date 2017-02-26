@@ -191,7 +191,7 @@ after_initialize do
           :link_id => fieldsMap["directoryopus_link_id"],
           :link_last_refreshed => refresh_time_distance,
           :link_version => fieldsMap["directoryopus_link_version"],
-          :link_edition => fieldsMap["directoryopus_link_edition"],
+          :link_edition => fieldsMap["directoryopus_link_edition"]
         }
       end
     end
