@@ -1,6 +1,6 @@
 plugins:
   directoryopus_enabled:
-    default: true
+    default: false
     client: true
   directoryopus_current_version:
     default: 12
