@@ -10,6 +10,14 @@
 			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
 		{{else if opuslinkLoadResult}}
 			{{#if opuslinkLoadResult.link_status}}
+				{{#if opuslinkIsAdmin}}
+					<div class="directoryopus-link-admin">
+						<p><b>Admin Only</b></p>
+						<p class="directoryopus-link-linkid">Link ID: {{opuslinkLoadResult.link_id}}</p>
+						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink Local"><i class="fa fa-chain-broken fa-fw"></i> Unlink Local</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
+						<p>(This clears the forum side link for the user, but not the other side.)</p>
+					</div>
+				{{/if}}
 				<div class="directoryopus-link-statrefdiv">
 					<div class="directoryopus-link-linked">
 						<p class="directoryopus-link-linkmain"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{opuslinkLoadResult.link_version}}</span> <span class="{{opuslinkLoadResult.link_edition_class}}">{{opuslinkLoadResult.link_edition}}</span> user.</span></p>
@@ -36,14 +44,26 @@
 						<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
 					{{/if}}
 				</div>
-				{{#if opuslinkClearIsAdmin}}
-					<div class="directoryopus-link-clear">
-						<p><b>Admin Only:</b></p>
-						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Clear Local"><i class="fa fa-trash fa-fw"></i> Clear Local</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
-						<p>(This clears the forum side link for the user, but not the other side.)</p>
+			{{else}}
+				{{#if opuslinkIsAdmin}}
+					<div class="directoryopus-link-admin">
+						<p><b>Admin Only</b></p>
+						{{#if opuslinkLoadResult.link_failures}}
+							<p>Invalid code attempts (alphabetical):</p>
+							<ol>
+								{{#each opuslinkLoadResult.link_failures as |badCode|}}
+									<li>{{badCode}}</li>
+								{{else}}
+									<li>(none)</li>
+								{{/each}}
+							</ol>
+							<p><button {{action "onOpusLinkClearFailures"}} class="btn btn-primary" title="Clear Failures"><i class="fa fa-trash fa-fw"></i> Clear Failures</button></p>
+							<p>(This clears the user's list of failures and allows them to make more attempts if they were blocked.)</p>
+						{{else}}
+							<p>(No invalid code attempts recorded for this user.)</p>
+						{{/if}}
 					</div>
 				{{/if}}
-			{{else}}
 				<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
 				<p>To link your account:</p>
 				<form class="directoryopus-link-form">

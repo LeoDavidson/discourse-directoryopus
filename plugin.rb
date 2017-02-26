@@ -105,9 +105,49 @@ after_initialize do
         u.custom_fields["directoryopus_link_version"] = link_version
         u.custom_fields["directoryopus_link_edition"] = link_edition
         u.custom_fields["directoryopus_link_id"] = link_id
+        u.custom_fields.delete("directoryopus_link_failures") # If they succeed, clean up any recorded failures from the database.
       else
         return false
       end
+      if (!u.save_custom_fields)
+        return false
+      end
+      return true
+    end
+
+    def addUserFailureCode(user, invalidCode)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      failString = u.custom_fields["directoryopus_link_failures"]
+      if (!(failString.blank?) && (failString.is_a? String))
+        failMap = JSON.parse(failString)
+      else
+        failMap = Hash.new
+      end
+      oldMapSize = failMap.size
+      failMap[invalidCode] = true
+      if (oldMapSize >= failMap.size)
+        return false
+      end
+      u.custom_fields["directoryopus_link_failures"] = JSON.generate(failMap)
+      if (!u.save_custom_fields)
+        return false
+      end
+      return true
+    end
+
+    def clearUserFailureCodes(user)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      u.custom_fields.delete("directoryopus_link_failures")
       if (!u.save_custom_fields)
         return false
       end
@@ -128,10 +168,15 @@ after_initialize do
       #    User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"])
       #       If user_id=3 => {3=>{"directoryopus_link_last_refreshed"=>"2017-02-22 23:28:41 UTC", "directoryopus_link_version"=>"12", "directoryopus_link_edition"=>"light", "directoryopus_link_id"=>"xxxxxxxxxxxxxxxx_leo"}}
       #       Or {} if nothing found at all.
-      fieldsMap = User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"])[user_id]
+      fieldsMap = User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition", "directoryopus_link_failures"])[user_id]
       if (fieldsMap.blank?)
         return {
           :link_status => false
+        }
+      elsif (fieldsMap["directoryopus_link_id"].blank?)
+        return {
+          :link_status => false,
+          :link_failures => fieldsMap["directoryopus_link_failures"]
         }
       else
         refresh_time_distance = ""
@@ -143,10 +188,10 @@ after_initialize do
         end
         return {
           :link_status => true,
+          :link_id => fieldsMap["directoryopus_link_id"],
           :link_last_refreshed => refresh_time_distance,
           :link_version => fieldsMap["directoryopus_link_version"],
           :link_edition => fieldsMap["directoryopus_link_edition"],
-          :link_id => fieldsMap["directoryopus_link_id"]
         }
       end
     end
@@ -156,7 +201,8 @@ after_initialize do
       if (res.is_a? String)
         return render_json_error(res)
       elsif (res.is_a? Hash)
-        res.delete(:link_id) # The link_id is not really secret but there is no reason to send it to the client.
+        res.delete(:link_id) if !current_user.admin? # The link_id is not really secret but there is no reason to send it to the client.
+        res.delete(:link_failures) if !current_user.admin? || res[:link_failures].blank?
         return render json: res
       end
       return render_json_error("Unexpected result type. Please notify an admin via private message.")
@@ -175,6 +221,7 @@ after_initialize do
       operationLink = false
       operationRefresh = false
       operationClearLocal = false
+      operationClearFailures = false
 
       if params.has_key?(:operation)
         operation = params[:operation]
@@ -188,6 +235,8 @@ after_initialize do
           operationRefresh = true
         elsif opLower == "clearlocal"
           operationClearLocal = true
+        elsif opLower == "clearfailures"
+          clearUserFailureCodes = true
         elsif opLower != "query"
           # operationQuery is set later on, not here.
           return "Invalid operation."
@@ -207,7 +256,7 @@ after_initialize do
         return "Invalid user_id"
       end
 
-      if (operationClearLocal)
+      if (operationClearLocal || clearUserFailureCodes)
         if (!current_user.admin?)
           return "You can't do that."
         end
@@ -228,6 +277,13 @@ after_initialize do
       if (operationClearLocal)
           # TODO: Record in admin log.
           setUserLinkData(user_record, "invalid", nil, nil, nil)
+          userLinkDetails = getUserLinkData(user_record)
+          return userLinkDetails
+      end
+
+      if (clearUserFailureCodes)
+          # TODO: Record in admin log.
+          clearUserFailureCodes(user_record)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
       end
@@ -270,6 +326,15 @@ after_initialize do
           return userLinkDetails
         end
 
+        failString = userLinkDetails[:link_failures]
+        if (!(failString.blank?) && (failString.is_a? String))
+          failMap = JSON.parse(failString)
+          if (failMap.size >= 10)
+            userLinkDetails[:remote_error] = "Too many invalid attempts. Please contact an admin via private message."
+            return userLinkDetails
+          end
+        end
+
         regCode = params[:reg_code]
         # The client should have processed the reg code into the correct case and format, so our regex is strict here.
         if (regCode.blank? || (!(regCode.is_a? String)) || regCode !~ /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/)
@@ -277,14 +342,10 @@ after_initialize do
           return userLinkDetails
         end
 
-        # TODO: Throttle the requests so they can't brute-force a reg code.
-        #       After too many failures, block them from being able to link at all and notify all admins.
-        #       But: If current_user.admin, allow the block to be bypassed (but not the throttle?)
-
         takeOwnership = false
         takeOwnershipDoneOnce = false
         loop do
- 
+
           jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :force => (takeOwnership ? 1 : 0) } )
 
           if takeOwnership
@@ -299,6 +360,11 @@ after_initialize do
           end
 
           if remoteStatusLower == "invalid"
+            addUserFailureCode(user_record, regCode)
+            userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
+            if (userLinkDetails.blank?)
+              return "Error re-obtaining account linking details. Please notify an admin via private message."
+            end
             userLinkDetails[:remote_error] = "Invalid registration code."
             return userLinkDetails
           elsif remoteStatusLower == "used"

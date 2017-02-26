@@ -10,14 +10,14 @@ export default Ember.Controller.extend({
 	opuslinkRegCodeShowMe: false,
 	opuslinkRegCodeExample: false,
 	opuslinkClearSafety: true,
-	opuslinkClearIsAdmin: false,
+	opuslinkIsAdmin: false,
 	opuslinkRegCodeInput: "",
 
 	initPermissions() {
 		const currentUser  = Discourse.User.current();
 		const currentAdmin = !!(currentUser && currentUser.get("admin"));
 		this.set("opuslinkClearSafety", true);
-		this.set("opuslinkClearIsAdmin", currentAdmin);
+		this.set("opuslinkIsAdmin", currentAdmin);
 	},
 
 	startLinkQuery(operationName, regCode) {
@@ -93,7 +93,13 @@ export default Ember.Controller.extend({
 			jsonResult["link_refresh_details_title"] = "Load Details";
 			jsonResult["link_refresh_have_details"] = false;
 		}
-		
+
+		if (typeof jsonResult["link_failures"] === "string") {
+			var failuresParsed = Object.keys(JSON.parse(jsonResult["link_failures"]));
+			failuresParsed.sort();
+			jsonResult["link_failures"] = failuresParsed;
+		}
+
 		var needRefresh = false;
 
 		if (isPro || isLight || verNum > 0) {
@@ -237,6 +243,14 @@ export default Ember.Controller.extend({
 			}
 			this.setErrorMessage(null);
 			this.startLinkQuery("clearlocal");
+		},
+
+		onOpusLinkClearFailures() {
+			if (this.get("opuslinkAjaxPending")) {
+				return;
+			}
+			this.setErrorMessage(null);
+			this.startLinkQuery("clearfailures");
 		}
 	},
 });

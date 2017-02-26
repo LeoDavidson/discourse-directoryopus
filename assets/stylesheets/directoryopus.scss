@@ -324,7 +324,7 @@
 		font-weight: initial;
 		line-height: initial;
 	}
-	.directoryopus-link-clear {
+	.directoryopus-link-admin {
 		border: 2px solid red;
 		background-color: rgba(255, 0, 0, 0.05);
 		color: black;
@@ -333,5 +333,14 @@
 		display: inline-block;
 		float: right;
 		width: 25%;
+		p, li {
+			margin: 0;
+		}
+		ol {
+			margin: 0.5em 0.5em 0.5em 1.5em;
+		}
+		.directoryopus-link-linkid {
+			font-size: 0.8em;
+		}
 	}
 }
