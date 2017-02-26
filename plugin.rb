@@ -54,6 +54,8 @@ after_initialize do
     before_action :ensure_plugin_enabled
     before_action :ensure_logged_in
 
+    MAX_REGCODE_FAILS = 10
+
     def ensure_plugin_enabled
       if !SiteSetting.directoryopus_enabled
         raise Discourse::InvalidAccess.new('Directory Opus plugin is not enabled')
@@ -137,6 +139,16 @@ after_initialize do
       if (!u.save_custom_fields)
         return false
       end
+      actingUserForLog = current_user
+      if current_user.id == u.id
+        actingUserForLog = -1 # Mark it as the system user if it's (presumably) not an admin changing someone else, since it's an admin action log not a user action log.
+      end
+      logDetails = "RegCode: #{invalidCode.gsub(/^([A-Z0-9]{5}-){3}(.+)$/, '...-\2')}"
+      logAdminAction(actingUserForLog, u, "linkopus_badcode", nil, nil, logDetails)
+      if (failMap.size >= MAX_REGCODE_FAILS)
+        logDetails = "MaxAttempts: #{MAX_REGCODE_FAILS}"
+        logAdminAction(actingUserForLog, u, "linkopus_block", nil, nil, logDetails)
+      end
       return true
     end
 
@@ -154,7 +166,6 @@ after_initialize do
       return true
     end
 
-    # ActionView::Helpers::DateHelper
     def getUserLinkData(user)
       return false if user.blank?
       if (user.is_a? Numeric)
@@ -194,6 +205,46 @@ after_initialize do
           :link_edition => fieldsMap["directoryopus_link_edition"]
         }
       end
+    end
+
+    def logAdminAction(actingUser, targetUser, actionName, oldValue, newValue, details)
+
+      if (actingUser.is_a? Numeric)
+        au = User.find_by_id(actingUser)
+      else
+        au = actingUser
+      end
+
+      if (targetUser.is_a? Numeric)
+        tu = User.find_by_id(targetUser)
+      else
+        tu = targetUser
+      end
+
+      user_url_path = "/users/#{tu.username}/link-opus"
+
+      # based on log_custom: https://github.com/discourse/discourse/blob/master/app/services/staff_action_logger.rb
+      attrs = {}
+      attrs[:action] = UserHistory.actions[:custom_staff]
+      attrs[:custom_type] = actionName
+      attrs[:acting_user_id] = au.id
+      attrs[:target_user_id] = tu.id
+      attrs[:context] = user_url_path
+      attrs[:previous_value] = oldValue if (!(oldValue.blank?))
+      attrs[:new_value] = newValue if (!(newValue.blank?))
+      attrs[:details] = details
+    # attrs[:details] = details.map {|r| "#{r[0]}: #{r[1]}"}.join("\n")
+      UserHistory.create(attrs)
+    end
+
+    def makeLinkContextLine(opusVersion, opusEdition)
+      if (opusVersion.blank? && opusEdition.blank?)
+        return "Not linked"
+      else
+        opusVersion = "<unknown version>" if (opusVersion.blank?)
+        opusEdition = "<unknown edition>" if (opusEdition.blank?)
+        return "Linked v#{opusVersion} #{opusEdition}"
+      end      
     end
 
     def index
@@ -275,14 +326,16 @@ after_initialize do
       end
 
       if (operationClearLocal)
-          # TODO: Record in admin log.
+          oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition])
+          newContext = makeLinkContextLine(nil, nil)
+          logAdminAction(current_user, user_record, "linkopus_unlink", oldContext, newContext, nil)
           setUserLinkData(user_record, "invalid", nil, nil, nil)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
       end
 
       if (clearUserFailureCodes)
-          # TODO: Record in admin log.
+          logAdminAction(current_user, user_record, "linkopus_clearfail", nil, nil, nil)
           clearUserFailureCodes(user_record)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
@@ -329,7 +382,7 @@ after_initialize do
         failString = userLinkDetails[:link_failures]
         if (!(failString.blank?) && (failString.is_a? String))
           failMap = JSON.parse(failString)
-          if (failMap.size >= 10)
+          if (failMap.size >= MAX_REGCODE_FAILS)
             userLinkDetails[:remote_error] = "Too many invalid attempts. Please contact an admin via private message."
             return userLinkDetails
           end
@@ -429,6 +482,15 @@ after_initialize do
       end
 
       # Save our version of the new data.
+      if ((jsonRemoteResult[:version].to_i != userLinkDetails[:link_version].to_i) || (jsonRemoteResult[:type] != userLinkDetails[:link_edition]))
+        oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition])
+        newContext = makeLinkContextLine(jsonRemoteResult[:version], jsonRemoteResult[:type])
+        actingUserForLog = current_user
+        if current_user.id == user_record.id
+          actingUserForLog = -1 # Mark it as the system user if it's (presumably) not an admin changing someone else, since it's an admin action log not a user action log.
+        end
+        logAdminAction(actingUserForLog, user_record, "linkopus_change", oldContext, newContext, nil)
+      end
       if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId]))
         userLinkDetails[:remote_error] = "Failed to update database. Please notify an admin via private message."
         return userLinkDetails

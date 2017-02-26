@@ -2,3 +2,13 @@ en:
   js:
     directoryopus:
       linkopus_title: "Account Linking"
+    admin:
+      logs:
+        staff_actions:
+          actions:
+            # Give our custom log action name a translation. See the log_custom call in our plugin.rb
+            linkopus_unlink: "Account linking: Unlink Local"
+            linkopus_clearfail: "Account linking: Clear failures"
+            linkopus_change: "Account linking: New status"
+            linkopus_block: "Account linking: Blocked due to too many failures"
+            linkopus_badcode: "Account linking: Invalid reg code given"
