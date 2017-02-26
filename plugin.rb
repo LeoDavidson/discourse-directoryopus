@@ -77,9 +77,8 @@ after_initialize do
         checkCodeUri = URI(SiteSetting.directoryopus_account_link_url)
         checkCodeUri.query = URI.encode_www_form(paramsAug)
 
-        # TODO: Find out if we need to do extra to verify the server's certificate is signed by a valid CA here.
-        #       I've checked that this makes sure the certificate matches the server, but that on its own isn't
-        #       enough to prevent a fake server with a fake cert that is self-signed or signed by a bogus CA.
+        # At least in the Discourse development and Docker environments, Net::HTTP.get with a HTTPS:// URL will automatically
+        # check most aspects of the certificate and fail if it is bad. This part of Ruby has improved over the years.
         res = Net::HTTP.get(checkCodeUri)
         return JSON.parse(res, { :symbolize_names=>true })
       rescue
