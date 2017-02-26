@@ -526,9 +526,10 @@ after_initialize do
     get '/' => 'opuslink#index'
   end
 
-  require_dependency "config/routes" # for USERNAME_ROUTE_FORMAT.
+  # TODO: require_dependency "config/routes" # for USERNAME_ROUTE_FORMAT.
+  #       But this broke in production, maybe due to order / dependencies? Using our own copy of it for now. Just a simple regex.
   Discourse::Application.routes.append do
-    mount ::DiscourseOpusLink::Engine, at: "/users/:username/link-opus(.:format)", constraints: {username: USERNAME_ROUTE_FORMAT}
+    mount ::DiscourseOpusLink::Engine, at: "/users/:username/link-opus(.:format)", constraints: {username: /[\w.\-]+?/}
     mount ::DiscourseOpusLinkLanding::Engine, at: "/link-opus"
   end
 end
