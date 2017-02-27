@@ -1,10 +1,6 @@
 export default {
-	setupUserProfileComponent(userModel, component, small) {
+	setupUserProfileComponent(userModel, component, small, currentUser) {
 
-		// https://meta.discourse.org/t/important-changes-to-plugin-outlets-for-ember-2-10/54136
-		// https://meta.discourse.org/t/testing-viewingself-from-plugin-outlet/57576
-
-		const currentUser  = Discourse.User.current();
 		const currentAdmin = !!(currentUser && currentUser.get("admin"));
 	//	const viewingAdmin = !!(userModel.get("admin"));
 		const viewingStaff = !!(userModel.get("staff"));
