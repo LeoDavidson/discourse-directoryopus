@@ -31,6 +31,13 @@ after_initialize do
     end
   end
 
+  class DiscourseOpusLink::OpusUpdateAccountLinks < ::Jobs::Scheduled
+    # every 6.hour
+    def execute(args)
+      OpuslinkController.refreshAllLinks
+    end
+  end
+
   require_dependency 'application_controller'
 
   # Server side of the landing component does nothing. We just want the client-side URL to work so it can show
@@ -55,7 +62,7 @@ after_initialize do
 
     MAX_REGCODE_FAILS = 10
 
-    def ensure_plugin_enabled
+    def self.static_ensure_plugin_enabled
       if !SiteSetting.directoryopus_enabled
         raise Discourse::InvalidAccess.new('Directory Opus plugin is not enabled')
       end
@@ -67,7 +74,11 @@ after_initialize do
       end
     end
 
-    def callRemoteLinkingServer(action, params)
+    def ensure_plugin_enabled
+      static_ensure_plugin_enabled
+    end
+
+    def self.callRemoteLinkingServer(action, params)
       begin
         paramsAug = params.clone
         paramsAug[:action] = action
@@ -85,7 +96,7 @@ after_initialize do
       end
     end
 
-    def setUserLinkData(user, link_status, link_version, link_edition, link_id)
+    def self.setUserLinkData(user, link_status, link_version, link_edition, link_id)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
@@ -164,6 +175,14 @@ after_initialize do
       return true
     end
 
+    def self.firstIfArray(x)
+      # If two things call save_custom_fields at the same time, it's possible for the value to turn into an array instead of one overwriting the other.
+      # At least, this happened when testing the scheduled jobs ran by making a job that ran every second and incremented an accounts version number.
+      # Ended up with a version of ["3430", "3430"] somehow. This is unlikely in reality, but we check for it to avoid blowing up. Just take whatever's first.
+      return x if !x.is_a? Array
+      return x.first
+    end
+
     def getUserLinkData(user)
       return false if user.blank?
       if (user.is_a? Numeric)
@@ -182,14 +201,14 @@ after_initialize do
         return {
           :link_status => false
         }
-      elsif (fieldsMap["directoryopus_link_id"].blank?)
+      elsif (firstIfArray(fieldsMap["directoryopus_link_id"]).blank?)
         return {
           :link_status => false,
-          :link_failures => fieldsMap["directoryopus_link_failures"]
+          :link_failures => firstIfArray(fieldsMap["directoryopus_link_failures"])
         }
       else
         refresh_time_distance = ""
-        timeThenUTC = fieldsMap["directoryopus_link_last_refreshed"]
+        timeThenUTC = firstIfArray(fieldsMap["directoryopus_link_last_refreshed"])
         if !timeThenUTC.blank?
           refresh_time_distance = view_context.distance_of_time_in_words(
             Time.now.utc, timeThenUTC,
@@ -197,15 +216,15 @@ after_initialize do
         end
         return {
           :link_status => true,
-          :link_id => fieldsMap["directoryopus_link_id"],
+          :link_id => firstIfArray(fieldsMap["directoryopus_link_id"]),
           :link_last_refreshed => refresh_time_distance,
-          :link_version => fieldsMap["directoryopus_link_version"],
-          :link_edition => fieldsMap["directoryopus_link_edition"]
+          :link_version => firstIfArray(fieldsMap["directoryopus_link_version"]),
+          :link_edition => firstIfArray(fieldsMap["directoryopus_link_edition"])
         }
       end
     end
 
-    def logAdminAction(actingUser, targetUser, actionName, oldValue, newValue, details)
+    def self.logAdminAction(actingUser, targetUser, actionName, oldValue, newValue, details)
 
       if (actingUser.is_a? Numeric)
         au = User.find_by_id(actingUser)
@@ -219,23 +238,23 @@ after_initialize do
         tu = targetUser
       end
 
-      user_url_path = "/users/#{tu.username}/link-opus"
+      user_url_path = (tu.blank?) ? (nil) : ("/users/#{tu.username}/link-opus")
 
       # based on log_custom: https://github.com/discourse/discourse/blob/master/app/services/staff_action_logger.rb
       attrs = {}
       attrs[:action] = UserHistory.actions[:custom_staff]
       attrs[:custom_type] = actionName
       attrs[:acting_user_id] = au.id
-      attrs[:target_user_id] = tu.id
-      attrs[:context] = user_url_path
-      attrs[:previous_value] = oldValue if (!(oldValue.blank?))
-      attrs[:new_value] = newValue if (!(newValue.blank?))
-      attrs[:details] = details
+      attrs[:target_user_id] = tu.id if !tu.blank?
+      attrs[:context] = user_url_path if !user_url_path.blank?
+      attrs[:previous_value] = oldValue if !oldValue.blank?
+      attrs[:new_value] = newValue if !newValue.blank?
+      attrs[:details] = details if !details.blank?
     # attrs[:details] = details.map {|r| "#{r[0]}: #{r[1]}"}.join("\n")
       UserHistory.create(attrs)
     end
 
-    def makeLinkContextLine(opusVersion, opusEdition)
+    def self.makeLinkContextLine(opusVersion, opusEdition)
       if (opusVersion.blank? && opusEdition.blank?)
         return "Not linked"
       else
@@ -445,7 +464,6 @@ after_initialize do
           
           break if !takeOwnership
         end
-
       end
 
       if remoteStatusLower == "error"
@@ -513,6 +531,82 @@ after_initialize do
 
       return userLinkDetails
 
+    end
+
+    def self.refreshAllLinks
+      static_ensure_plugin_enabled
+
+      logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, nil)
+
+      maxUserId = User.maximum(:id)
+      return if (maxUserId.blank?)
+      mapUserIds = User.custom_fields_for_ids(1..maxUserId, ["directoryopus_link_id", "directoryopus_link_version", "directoryopus_link_edition"])
+      return if (mapUserIds.blank?)
+
+      mapLinkIds = {}
+      mapUserIds.each { |user_id, cust_fields|
+        link_id = firstIfArray(cust_fields["directoryopus_link_id"])
+        if (!link_id.blank?)
+          mapLinkIds[link_id] = { :user_id => user_id, :version => firstIfArray(cust_fields["directoryopus_link_version"]).to_i, :edition => firstIfArray(cust_fields["directoryopus_link_edition"]) }
+        end
+      }
+
+      mapUserIds = nil # It might be fairly large, and we're done with it, so let it be garbage collected.
+      
+      remoteLinks = callRemoteLinkingServer("dump", {})[:linkedAccounts]
+      return if (remoteLinks.blank?)
+      
+      expectedFormat = true
+      expectedLast = false
+      remoteLinks.each { |remoteLinkDetails|
+        if (expectedLast)
+          expectedFormat = false # The special ":end=>1" element has something after it. That's wrong.
+        else
+          remoteStatus = remoteLinkDetails[:status]
+          remoteLinkId = remoteLinkDetails[:linkId]
+          remoteEdition = remoteLinkDetails[:type]
+          remoteVersion = remoteLinkDetails[:version]
+          if (remoteStatus != "linked" || remoteLinkId.blank? || !(remoteLinkId.is_a? String) || (remoteEdition != "pro" && remoteEdition != "light") || !(remoteVersion.is_a? Fixnum))
+            if (remoteLinkDetails[:end] == 1)
+              expectedLast = true # There's a special ":end=>1" marker at the end so we know the data wasn't truncated.
+            else
+              expectedFormat = false # Data isn't as we expect it, so don't de-link anyone based on it.
+            end
+          elsif (mapLinkIds.include? remoteLinkId)
+            if ((remoteVersion != mapLinkIds[remoteLinkId][:version]) || (remoteEdition != mapLinkIds[remoteLinkId][:edition]))
+              oldContext = makeLinkContextLine(mapLinkIds[remoteLinkId][:version], mapLinkIds[remoteLinkId][:edition])
+              newContext = makeLinkContextLine(remoteVersion, remoteEdition)
+              user_record = User.find_by_id(mapLinkIds[remoteLinkId][:user_id])
+              if (!user_record.blank?)
+                logAdminAction(-1, user_record, "linkopus_change", oldContext, newContext, nil)
+                setUserLinkData(user_record, "linked", remoteVersion, remoteEdition, remoteLinkId)
+              end
+            end
+            mapLinkIds.delete(remoteLinkId)
+          end
+        end
+      }
+
+      expectedFormat = false if (!expectedLast) # We didn't see the special ":end=>1" element.
+
+      # We've handled changes and removed anyone we saw was still linked.
+      # Now to de-link anyone who is no longer known by the server...
+      # ...Unless expectedFormat is false, as we don't want to de-link people if we're unsure we understood the server.
+      if (expectedFormat)
+        mapLinkIds.each { |link_id, user_fields|
+          user_id = user_fields[:user_id]
+          oldContext = makeLinkContextLine(user_fields[:version], user_fields[:edition])
+          newContext = makeLinkContextLine(nil, nil)
+          user_record = User.find_by_id(user_id)
+          if (!user_record.blank?)
+            logAdminAction(-1, user_record, "linkopus_unlink", oldContext, newContext, nil)
+            setUserLinkData(user_record, "invalid", nil, nil, nil)
+          end
+        }
+      end
+
+      logAdminAction(-1, nil, "linkopus_jobend", nil, nil, expectedFormat ? "Data from server OK." : "WARNING: Unexpected data from server.")
+      return # avoid returning whatever random crap was on the last line due to Ruby's incredible design as a safe language to write anything in.
     end
 
   end

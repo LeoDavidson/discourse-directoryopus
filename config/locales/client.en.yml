@@ -12,3 +12,5 @@ en:
             linkopus_change: "Account linking: New status"
             linkopus_block: "Account linking: Blocked due to too many failures"
             linkopus_badcode: "Account linking: Invalid reg code given"
+            linkopus_jobstart: "Account linking: Automated refresh start"
+            linkopus_jobend: "Account linking: Automated refresh end"
