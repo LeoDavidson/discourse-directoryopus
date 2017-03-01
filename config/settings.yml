@@ -20,3 +20,6 @@ plugins:
   directoryopus_composer_help_url:
     default: ""
     client: true
+  directoryopus_refresh_job_test_mode:
+    default: true
+    client: false

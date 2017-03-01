@@ -7,3 +7,4 @@ en:
     directoryopus_account_link_code_code: "Parameter for Directory Opus linking API."
     directoryopus_composer_help_title: "Text of link to place above the post editor."
     directoryopus_composer_help_url: "Target of link to place above the post editor."
+    directoryopus_refresh_job_test_mode: "Make the background task which refreshes link states log what it would do without actually doing it."

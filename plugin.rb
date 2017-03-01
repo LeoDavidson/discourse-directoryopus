@@ -532,7 +532,10 @@ after_initialize do
     def refreshAllLinks
       ensure_plugin_enabled
 
-      logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, nil)
+
+      testMode = !!SiteSetting.directoryopus_refresh_job_test_mode
+
+      logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, testMode ? "TEST MODE" : nil)
 
       maxUserId = User.maximum(:id)
       return if (maxUserId.blank?)
@@ -574,8 +577,10 @@ after_initialize do
               newContext = makeLinkContextLine(remoteVersion, remoteEdition)
               user_record = User.find_by_id(mapLinkIds[remoteLinkId][:user_id])
               if (!user_record.blank?)
-                logAdminAction(-1, user_record, "linkopus_change", oldContext, newContext, nil)
-                setUserLinkData(user_record, "linked", remoteVersion, remoteEdition, remoteLinkId)
+                logAdminAction(-1, user_record, "linkopus_change", oldContext, newContext, testMode ? "TEST MODE" : nil)
+                if (!testMode)
+                  setUserLinkData(user_record, "linked", remoteVersion, remoteEdition, remoteLinkId)
+                end
               end
             end
             mapLinkIds.delete(remoteLinkId)
@@ -595,8 +600,10 @@ after_initialize do
           newContext = makeLinkContextLine(nil, nil)
           user_record = User.find_by_id(user_id)
           if (!user_record.blank?)
-            logAdminAction(-1, user_record, "linkopus_unlink", oldContext, newContext, nil)
-            setUserLinkData(user_record, "invalid", nil, nil, nil)
+            logAdminAction(-1, user_record, "linkopus_unlink", oldContext, newContext, testMode ? "TEST MODE" : nil)
+            if (!testMode)
+              setUserLinkData(user_record, "invalid", nil, nil, nil)
+            end
           end
         }
       end
