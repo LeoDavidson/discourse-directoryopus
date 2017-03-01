@@ -122,6 +122,20 @@ after_initialize do
       return true
     end
 
+    def bumpUserRefreshTime(user)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
+      if (!u.save_custom_fields)
+        return false
+      end
+      return true
+    end
+
     def addUserFailureCode(user, invalidCode)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
@@ -572,7 +586,11 @@ after_initialize do
               expectedFormat = false # Data isn't as we expect it, so don't de-link anyone based on it.
             end
           elsif (mapLinkIds.include? remoteLinkId)
-            if ((remoteVersion != mapLinkIds[remoteLinkId][:version]) || (remoteEdition != mapLinkIds[remoteLinkId][:edition]))
+            if ((remoteVersion == mapLinkIds[remoteLinkId][:version]) && (remoteEdition == mapLinkIds[remoteLinkId][:edition]))
+              if (!testMode)
+                bumpUserRefreshTime(mapLinkIds[remoteLinkId][:user_id]) # Just bump the last refresh time.
+              end
+            else
               oldContext = makeLinkContextLine(mapLinkIds[remoteLinkId][:version], mapLinkIds[remoteLinkId][:edition])
               newContext = makeLinkContextLine(remoteVersion, remoteEdition)
               user_record = User.find_by_id(mapLinkIds[remoteLinkId][:user_id])
