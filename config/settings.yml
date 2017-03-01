@@ -14,3 +14,9 @@ plugins:
   directoryopus_account_link_code_name:
     default: ""
     client: false
+  directoryopus_composer_help_title:
+    default: ""
+    client: true
+  directoryopus_composer_help_url:
+    default: ""
+    client: true
