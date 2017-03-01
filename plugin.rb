@@ -546,6 +546,9 @@ after_initialize do
     def refreshAllLinks
       ensure_plugin_enabled
 
+      if (Discourse.readonly_mode?)
+        return
+      end
 
       testMode = !!SiteSetting.directoryopus_refresh_job_test_mode
 
@@ -569,9 +572,18 @@ after_initialize do
       remoteLinks = callRemoteLinkingServer("dump", {})[:linkedAccounts]
       return if (remoteLinks.blank?)
       
+      if (Discourse.readonly_mode?)
+        logAdminAction(-1, nil, "linkopus_jobend", nil, nil, "Stopped due to read-only mode.")
+        return
+      end
+
       expectedFormat = true
       expectedLast = false
       remoteLinks.each { |remoteLinkDetails|
+        if (Discourse.readonly_mode?)
+          logAdminAction(-1, nil, "linkopus_jobend", nil, nil, "Stopped due to read-only mode.")
+          return
+        end
         if (expectedLast)
           expectedFormat = false # The special ":end=>1" element has something after it. That's wrong.
         else
@@ -613,6 +625,10 @@ after_initialize do
       # ...Unless expectedFormat is false, as we don't want to de-link people if we're unsure we understood the server.
       if (expectedFormat)
         mapLinkIds.each { |link_id, user_fields|
+          if (Discourse.readonly_mode?)
+            logAdminAction(-1, nil, "linkopus_jobend", nil, nil, "Stopped due to read-only mode.")
+            return
+          end
           user_id = user_fields[:user_id]
           oldContext = makeLinkContextLine(user_fields[:version], user_fields[:edition])
           newContext = makeLinkContextLine(nil, nil)
