@@ -34,7 +34,7 @@ after_initialize do
   class DiscourseOpusLink::OpusUpdateAccountLinks < ::Jobs::Scheduled
     # every 6.hour
     def execute(args)
-      OpuslinkController.refreshAllLinks
+      OpuslinkController.new.refreshAllLinks
     end
   end
 
@@ -62,7 +62,7 @@ after_initialize do
 
     MAX_REGCODE_FAILS = 10
 
-    def self.static_ensure_plugin_enabled
+    def ensure_plugin_enabled
       if !SiteSetting.directoryopus_enabled
         raise Discourse::InvalidAccess.new('Directory Opus plugin is not enabled')
       end
@@ -74,11 +74,7 @@ after_initialize do
       end
     end
 
-    def ensure_plugin_enabled
-      static_ensure_plugin_enabled
-    end
-
-    def self.callRemoteLinkingServer(action, params)
+    def callRemoteLinkingServer(action, params)
       begin
         paramsAug = params.clone
         paramsAug[:action] = action
@@ -96,7 +92,7 @@ after_initialize do
       end
     end
 
-    def self.setUserLinkData(user, link_status, link_version, link_edition, link_id)
+    def setUserLinkData(user, link_status, link_version, link_edition, link_id)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
@@ -175,7 +171,7 @@ after_initialize do
       return true
     end
 
-    def self.firstIfArray(x)
+    def firstIfArray(x)
       # If two things call save_custom_fields at the same time, it's possible for the value to turn into an array instead of one overwriting the other.
       # At least, this happened when testing the scheduled jobs ran by making a job that ran every second and incremented an accounts version number.
       # Ended up with a version of ["3430", "3430"] somehow. This is unlikely in reality, but we check for it to avoid blowing up. Just take whatever's first.
@@ -224,7 +220,7 @@ after_initialize do
       end
     end
 
-    def self.logAdminAction(actingUser, targetUser, actionName, oldValue, newValue, details)
+    def logAdminAction(actingUser, targetUser, actionName, oldValue, newValue, details)
 
       if (actingUser.is_a? Numeric)
         au = User.find_by_id(actingUser)
@@ -254,7 +250,7 @@ after_initialize do
       UserHistory.create(attrs)
     end
 
-    def self.makeLinkContextLine(opusVersion, opusEdition)
+    def makeLinkContextLine(opusVersion, opusEdition)
       if (opusVersion.blank? && opusEdition.blank?)
         return "Not linked"
       else
@@ -533,8 +529,8 @@ after_initialize do
 
     end
 
-    def self.refreshAllLinks
-      static_ensure_plugin_enabled
+    def refreshAllLinks
+      ensure_plugin_enabled
 
       logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, nil)
 
