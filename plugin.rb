@@ -34,7 +34,7 @@ after_initialize do
   class DiscourseOpusLink::OpusUpdateAccountLinks < ::Jobs::Scheduled
     every 6.hour
     def execute(args)
-      OpuslinkController.new.refreshAllLinks
+      DiscourseOpusLink::OpuslinkController.new.refreshAllLinks
     end
   end
 
