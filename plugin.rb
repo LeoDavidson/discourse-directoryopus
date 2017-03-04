@@ -264,13 +264,17 @@ after_initialize do
       UserHistory.create(attrs)
     end
 
-    def makeLinkContextLine(opusVersion, opusEdition)
+    def makeLinkContextLine(opusVersion, opusEdition, linkId)
       if (opusVersion.blank? && opusEdition.blank?)
         return "Not linked"
       else
         opusVersion = "<unknown version>" if (opusVersion.blank?)
         opusEdition = "<unknown edition>" if (opusEdition.blank?)
-        return "Linked v#{opusVersion} #{opusEdition}"
+        if (linkId.blank?)
+          return "Linked v#{opusVersion} #{opusEdition}"
+        else
+          return "Linked v#{opusVersion} #{opusEdition} #{linkId}"
+        end
       end      
     end
 
@@ -353,8 +357,8 @@ after_initialize do
       end
 
       if (operationClearLocal)
-          oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition])
-          newContext = makeLinkContextLine(nil, nil)
+          oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition], userLinkDetails[:link_id])
+          newContext = makeLinkContextLine(nil, nil, nil)
           logAdminAction(current_user, user_record, "linkopus_unlink", oldContext, newContext, nil)
           setUserLinkData(user_record, "invalid", nil, nil, nil)
           userLinkDetails = getUserLinkData(user_record)
@@ -509,8 +513,8 @@ after_initialize do
 
       # Save our version of the new data.
       if ((jsonRemoteResult[:version].to_i != userLinkDetails[:link_version].to_i) || (jsonRemoteResult[:type] != userLinkDetails[:link_edition]))
-        oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition])
-        newContext = makeLinkContextLine(jsonRemoteResult[:version], jsonRemoteResult[:type])
+        oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition], nil)
+        newContext = makeLinkContextLine(jsonRemoteResult[:version], jsonRemoteResult[:type], nil)
         actingUserForLog = current_user
         if current_user.id == user_record.id
           actingUserForLog = -1 # Mark it as the system user if it's (presumably) not an admin changing someone else, since it's an admin action log not a user action log.
@@ -552,7 +556,7 @@ after_initialize do
 
       testMode = !!SiteSetting.directoryopus_refresh_job_test_mode
 
-      logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, testMode ? "TEST MODE" : nil)
+      # logAdminAction(-1, nil, "linkopus_jobstart", nil, nil, testMode ? "TEST MODE" : nil)
 
       maxUserId = User.maximum(:id)
       return if (maxUserId.blank?)
@@ -603,8 +607,8 @@ after_initialize do
                 bumpUserRefreshTime(mapLinkIds[remoteLinkId][:user_id]) # Just bump the last refresh time.
               end
             else
-              oldContext = makeLinkContextLine(mapLinkIds[remoteLinkId][:version], mapLinkIds[remoteLinkId][:edition])
-              newContext = makeLinkContextLine(remoteVersion, remoteEdition)
+              oldContext = makeLinkContextLine(mapLinkIds[remoteLinkId][:version], mapLinkIds[remoteLinkId][:edition], nil)
+              newContext = makeLinkContextLine(remoteVersion, remoteEdition, nil)
               user_record = User.find_by_id(mapLinkIds[remoteLinkId][:user_id])
               if (!user_record.blank?)
                 logAdminAction(-1, user_record, "linkopus_change", oldContext, newContext, testMode ? "TEST MODE" : nil)
@@ -630,8 +634,8 @@ after_initialize do
             return
           end
           user_id = user_fields[:user_id]
-          oldContext = makeLinkContextLine(user_fields[:version], user_fields[:edition])
-          newContext = makeLinkContextLine(nil, nil)
+          oldContext = makeLinkContextLine(user_fields[:version], user_fields[:edition], link_id)
+          newContext = makeLinkContextLine(nil, nil, nil)
           user_record = User.find_by_id(user_id)
           if (!user_record.blank?)
             logAdminAction(-1, user_record, "linkopus_unlink", oldContext, newContext, testMode ? "TEST MODE" : nil)
