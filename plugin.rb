@@ -92,7 +92,7 @@ after_initialize do
       end
     end
 
-    def setUserLinkData(user, link_status, link_version, link_edition, link_id)
+    def setUserLinkData(user, link_status, link_version, link_edition, link_id, isAutoRefresh)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
@@ -108,7 +108,11 @@ after_initialize do
         u.custom_fields.delete("directoryopus_link_edition")
         u.custom_fields.delete("directoryopus_link_id")
       elsif (statusLower == "linked" && !link_id.blank?)
-        u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
+        if (isAutoRefresh)
+          u.custom_fields.delete("directoryopus_link_last_refreshed") # Delete it so the system-wide time is used.
+        else
+          u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
+        end
         u.custom_fields["directoryopus_link_version"] = link_version
         u.custom_fields["directoryopus_link_edition"] = link_edition
         u.custom_fields["directoryopus_link_id"] = link_id
@@ -130,6 +134,21 @@ after_initialize do
       end
       return false if u.blank?
       u.custom_fields["directoryopus_link_last_refreshed"] = Time.now.utc
+      if (!u.save_custom_fields)
+        return false
+      end
+      return true
+    end
+
+    def clearUserRefreshTime(user)
+      if (user.is_a? Numeric)
+        u = User.find_by_id(user)
+      else
+        u = user
+      end
+      return false if u.blank?
+      return false if u.custom_fields["directoryopus_link_last_refreshed"].blank?
+      u.custom_fields.delete("directoryopus_link_last_refreshed")
       if (!u.save_custom_fields)
         return false
       end
@@ -206,7 +225,16 @@ after_initialize do
       #    User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition"])
       #       If user_id=3 => {3=>{"directoryopus_link_last_refreshed"=>"2017-02-22 23:28:41 UTC", "directoryopus_link_version"=>"12", "directoryopus_link_edition"=>"light", "directoryopus_link_id"=>"xxxxxxxxxxxxxxxx_leo"}}
       #       Or {} if nothing found at all.
-      fieldsMap = User.custom_fields_for_ids(user_id, ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition", "directoryopus_link_failures"])[user_id]
+      # We use the system user (id = -1) to store site-wide values, like the last refresh time if it isn't overridden for a particular user. This lets us write the last auto-update time into one place (instead of into
+      # every single user) and avoids lots of table updates that waste time and influate the database ID numbers by about 10,000 per day when nothing has changed except the update times.
+      fieldsMapMap = User.custom_fields_for_ids([-1,user_id], ["directoryopus_link_id", "directoryopus_link_last_refreshed", "directoryopus_link_version", "directoryopus_link_edition", "directoryopus_link_failures"])
+      if (fieldsMapMap.blank?)
+        return {
+          :link_status => false
+        }
+      end
+      fieldsMapSystem = fielsMapMap[-1]
+      fieldsMap = fielsMapMap[user_id]
       if (fieldsMap.blank?)
         return {
           :link_status => false
@@ -219,6 +247,9 @@ after_initialize do
       else
         refresh_time_distance = ""
         timeThenUTC = firstIfArray(fieldsMap["directoryopus_link_last_refreshed"])
+        if (timeThenUTC.blank? && !(fieldsMapSystem.blank?))
+          timeThenUTC = firstIfArray(fieldsMapSystem["directoryopus_link_last_refreshed"])
+        end
         if !timeThenUTC.blank?
           refresh_time_distance = view_context.distance_of_time_in_words(
             Time.now.utc, timeThenUTC,
@@ -360,7 +391,7 @@ after_initialize do
           oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition], userLinkDetails[:link_id])
           newContext = makeLinkContextLine(nil, nil, nil)
           logAdminAction(current_user, user_record, "linkopus_unlink", oldContext, newContext, nil)
-          setUserLinkData(user_record, "invalid", nil, nil, nil)
+          setUserLinkData(user_record, "invalid", nil, nil, nil, false)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
       end
@@ -521,7 +552,7 @@ after_initialize do
         end
         logAdminAction(actingUserForLog, user_record, "linkopus_change", oldContext, newContext, nil)
       end
-      if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId]))
+      if (!setUserLinkData(user_record, remoteStatusLower, jsonRemoteResult[:version], jsonRemoteResult[:type], jsonRemoteResult[:linkId], false))
         userLinkDetails[:remote_error] = "Failed to update database. Please notify an admin via private message."
         return userLinkDetails
       end
@@ -604,16 +635,16 @@ after_initialize do
           elsif (mapLinkIds.include? remoteLinkId)
             if ((remoteVersion == mapLinkIds[remoteLinkId][:version]) && (remoteEdition == mapLinkIds[remoteLinkId][:edition]))
               if (!testMode)
-                bumpUserRefreshTime(mapLinkIds[remoteLinkId][:user_id]) # Just bump the last refresh time.
+                clearUserRefreshTime(mapLinkIds[remoteLinkId][:user_id]) # Just clear the last refresh time, so the user gets the system-wide one.
               end
             else
               oldContext = makeLinkContextLine(mapLinkIds[remoteLinkId][:version], mapLinkIds[remoteLinkId][:edition], nil)
               newContext = makeLinkContextLine(remoteVersion, remoteEdition, nil)
               user_record = User.find_by_id(mapLinkIds[remoteLinkId][:user_id])
               if (!user_record.blank?)
-                logAdminAction(-1, user_record, "linkopus_change", oldContext, newContext, testMode ? "TEST MODE" : nil)
+                logAdminAction(-1, user_record, "linkopus_jobchange", oldContext, newContext, testMode ? "TEST MODE" : nil)
                 if (!testMode)
-                  setUserLinkData(user_record, "linked", remoteVersion, remoteEdition, remoteLinkId)
+                  setUserLinkData(user_record, "linked", remoteVersion, remoteEdition, remoteLinkId, true)
                 end
               end
             end
@@ -621,6 +652,13 @@ after_initialize do
           end
         end
       }
+
+      # Bump the time on the system account (id == -1) which is used as the last refresh time for each user unless they have an individual time stored.
+      # This reduces the amount of database updates we need to do, speeding things up and also avoiding bloating the row IDs just to record we did a refresh
+      # for each user even when nothing else about the user has changed.
+      if (!testMode)
+        bumpUserRefreshTime(-1)
+      end
 
       expectedFormat = false if (!expectedLast) # We didn't see the special ":end=>1" element.
 
@@ -638,9 +676,9 @@ after_initialize do
           newContext = makeLinkContextLine(nil, nil, nil)
           user_record = User.find_by_id(user_id)
           if (!user_record.blank?)
-            logAdminAction(-1, user_record, "linkopus_unlink", oldContext, newContext, testMode ? "TEST MODE" : nil)
+            logAdminAction(-1, user_record, "linkopus_jobunlink", oldContext, newContext, testMode ? "TEST MODE" : nil)
             if (!testMode)
-              setUserLinkData(user_record, "invalid", nil, nil, nil)
+              setUserLinkData(user_record, "invalid", nil, nil, nil, true)
             end
           end
         }
