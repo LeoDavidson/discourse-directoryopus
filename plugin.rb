@@ -233,8 +233,8 @@ after_initialize do
           :link_status => false
         }
       end
-      fieldsMapSystem = fielsMapMap[-1]
-      fieldsMap = fielsMapMap[user_id]
+      fieldsMapSystem = fieldsMapMap[-1]
+      fieldsMap = fieldsMapMap[user_id]
       if (fieldsMap.blank?)
         return {
           :link_status => false
