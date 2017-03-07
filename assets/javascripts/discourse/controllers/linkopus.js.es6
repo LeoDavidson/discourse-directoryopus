@@ -172,7 +172,7 @@ export default Ember.Controller.extend({
 			}
 		// Trim spaces, convert to uppercase, and add the dashes if any are missing.
 		// The server side is much more strict, as it expects us to have done this already.
-		var regCode = regCodeOrig.trim().toUpperCase().replace(/^([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})$/, "$1-$2-$3-$4");
+		var regCode = regCodeOrig.trim().toUpperCase().replace(/^([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9]{5})-?([A-Z0-9])?$/, "$1-$2-$3-$4-$5").replace(/^(.+)-$/,"$1");
 		if (regCode !== regCodeOrig) {
 			this.set("opuslinkRegCodeInput", regCode);
 		}
@@ -183,7 +183,7 @@ export default Ember.Controller.extend({
 		if (typeof regCode !== "string") {
 			return false;
 		}
-		if (! /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/.test(regCode) ) {
+		if (! /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}(-[A-Z0-9])?$/.test(regCode) ) {
 			return false;
 		}
 		return true;

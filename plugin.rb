@@ -452,7 +452,7 @@ after_initialize do
 
         regCode = params[:reg_code]
         # The client should have processed the reg code into the correct case and format, so our regex is strict here.
-        if (regCode.blank? || (!(regCode.is_a? String)) || regCode !~ /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/)
+        if (regCode.blank? || (!(regCode.is_a? String)) || regCode !~ /^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}(-[A-Z0-9])?$/)
           userLinkDetails[:remote_error] = "RC param invalid. Please notify an admin via private message."
           return userLinkDetails
         end
