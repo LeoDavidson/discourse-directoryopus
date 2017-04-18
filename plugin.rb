@@ -155,7 +155,7 @@ after_initialize do
       return true
     end
 
-    def addUserFailureCode(user, invalidCode)
+    def addUserFailureCode(user, invalidCode, isEval)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
@@ -181,7 +181,9 @@ after_initialize do
       if current_user.id == u.id
         actingUserForLog = -1 # Mark it as the system user if it's (presumably) not an admin changing someone else, since it's an admin action log not a user action log.
       end
-      logDetails = "RegCode: #{invalidCode.gsub(/^([A-Z0-9]{5}-){3}(.+)$/, '...-\2')}"
+      evalString = ""
+      evalString = "Eval " if isEval
+      logDetails = "RegCode: #{evalString}#{invalidCode.gsub(/^([A-Z0-9]{5}-){3}(.+)$/, '...-\2')}"
       logAdminAction(actingUserForLog, u, "linkopus_badcode", nil, nil, logDetails)
       if (failMap.size >= MAX_REGCODE_FAILS)
         logDetails = "MaxAttempts: #{MAX_REGCODE_FAILS}"
@@ -475,12 +477,20 @@ after_initialize do
           end
 
           if remoteStatusLower == "invalid"
-            addUserFailureCode(user_record, regCode)
+            addUserFailureCode(user_record, regCode, false)
             userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
             if (userLinkDetails.blank?)
               return "Error re-obtaining account linking details. Please notify an admin via private message."
             end
             userLinkDetails[:remote_error] = "Invalid registration code."
+            return userLinkDetails
+          elsif remoteStatusLower == "eval"
+            addUserFailureCode(user_record, regCode, true)
+            userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
+            if (userLinkDetails.blank?)
+              return "Error re-obtaining account linking details. Please notify an admin via private message."
+            end
+            userLinkDetails[:remote_error] = "Evaluation codes cannot be linked. Please check you are using the correct purchased registration code."
             return userLinkDetails
           elsif remoteStatusLower == "used"
             # Handle situation where account is already linked, and it looks like it was linked to this account
@@ -514,6 +524,12 @@ after_initialize do
       if remoteStatusLower == "error"
         userLinkDetails[:remote_error] = "Request failed. Please try later. If the problem persists, please notify an admin via private message."
         return userLinkDetails
+      end
+      
+      # Map "eval" to "invalid" for the rest of the code here, as the two are the same in this context, and "invalid" is the main/older status.
+      # The "eval" status was added so we can tell the user they tried to use an eval code when linking, to help them know why it failed.
+      if remoteStatusLower == "eval"
+        remoteStatusLower = "invalid"
       end
 
       resultBad = false
