@@ -281,7 +281,7 @@ after_initialize do
         tu = targetUser
       end
 
-      user_url_path = (tu.blank?) ? (nil) : ("/users/#{tu.username}/link-opus")
+      user_url_path = (tu.blank?) ? (nil) : ("/u/#{tu.username}/link-opus")
 
       # based on log_custom: https://github.com/discourse/discourse/blob/master/app/services/staff_action_logger.rb
       attrs = {}
@@ -717,7 +717,7 @@ after_initialize do
   # TODO: require_dependency "config/routes" # for USERNAME_ROUTE_FORMAT.
   #       But this broke in production, maybe due to order / dependencies? Using our own copy of it for now. Just a simple regex.
   Discourse::Application.routes.append do
-    mount ::DiscourseOpusLink::Engine, at: "/users/:username/link-opus(.:format)", constraints: {username: /[\w.\-]+?/}
+    mount ::DiscourseOpusLink::Engine, at: "/u/:username/link-opus(.:format)", constraints: {username: /[\w.\-]+?/}
     mount ::DiscourseOpusLinkLanding::Engine, at: "/link-opus"
   end
 end

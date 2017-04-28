@@ -1,7 +1,7 @@
 export default {
 
-  // We want to put this route under the existing /users/<username>/ level, as
-  // /users/<username>/link-opus
+  // We want to put this route under the existing /u/<username>/ level, as
+  // /u/<username>/link-opus
   
   // The "resource" attribute identifies the existing branch to add things under. For the list of branches, see:
   //   https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/routes/app-route-map.js.es6

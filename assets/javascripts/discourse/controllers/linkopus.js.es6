@@ -53,7 +53,7 @@ export default Ember.Controller.extend({
 		// Start the ajax/json request, which is async.
 		// When/if it finishes successfully, store the json results on the model.
 		// If it fails, set a failure error message that is displayed instead.
-		ajax("/users/" + username + "/link-opus.json", {
+		ajax("/u/" + username + "/link-opus.json", {
 				type: 'GET',
 				cache: false,
 				data: dataParams,
