@@ -461,65 +461,52 @@ after_initialize do
           return userLinkDetails
         end
 
-        takeOwnership = false
-        takeOwnershipDoneOnce = false
-        loop do
+        jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :force =>  0 } )
 
-          jsonRemoteResult = callRemoteLinkingServer("link", { :reg => regCode, :link => user_record.username, :force => (takeOwnership ? 1 : 0) } )
+        if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
+          remoteStatusLower = "error"
+        else
+          remoteStatusLower = jsonRemoteResult[:status].downcase
+        end
 
-          if takeOwnership
-            takeOwnership = false
-            takeOwnershipDoneOnce = true
+        if remoteStatusLower == "invalid"
+          addUserFailureCode(user_record, regCode, false)
+          userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
+          if (userLinkDetails.blank?)
+            return "Error re-obtaining account linking details. Please notify an admin via private message."
           end
+          userLinkDetails[:remote_error] = "Invalid registration code."
+          return userLinkDetails
+        elsif remoteStatusLower == "eval"
+          addUserFailureCode(user_record, regCode, true)
+          userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
+          if (userLinkDetails.blank?)
+            return "Error re-obtaining account linking details. Please notify an admin via private message."
+          end
+          userLinkDetails[:remote_error] = "Evaluation codes cannot be linked. Please check you are using the correct purchased registration code."
+          return userLinkDetails
+        elsif remoteStatusLower == "already_linked"
+          addUserFailureCode(user_record, regCode, false)
+          userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
+          if (userLinkDetails.blank?)
+            return "Error re-obtaining account linking details. Please notify an admin via private message."
+          end
+          userLinkDetails[:remote_error] = "Your account is already linked. This is unusual. Please notify an admin via private message for help."
+          return userLinkDetails
+        elsif remoteStatusLower == "used"
+          # The remote server handles the case where the account is already linked to the code we asked for
+          # but we were unaware of it on our side (e.g. switch into read-only mode, power failure, transaction failure
+          # on this side after we told the remote side to create a link but had not recorded it ourselves yet).
+          # In that case, the server returns success. So we don't need to handle that here like we used to, just error.
 
-          if (jsonRemoteResult.blank? || jsonRemoteResult[:status].blank? || (!(jsonRemoteResult[:status].is_a? String)))
-            remoteStatusLower = "error"
+          # OK, it is used for real, so return a simple error.
+          maxUses = jsonRemoteResult[:max]
+          if max == 1
+            userLinkDetails[:remote_error] = "That registration code is already linked to another account."
           else
-            remoteStatusLower = jsonRemoteResult[:status].downcase
+            userLinkDetails[:remote_error] = "That registration code has been linked the maximum number of times (#{maxUses})."
           end
-
-          if remoteStatusLower == "invalid"
-            addUserFailureCode(user_record, regCode, false)
-            userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
-            if (userLinkDetails.blank?)
-              return "Error re-obtaining account linking details. Please notify an admin via private message."
-            end
-            userLinkDetails[:remote_error] = "Invalid registration code."
-            return userLinkDetails
-          elsif remoteStatusLower == "eval"
-            addUserFailureCode(user_record, regCode, true)
-            userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
-            if (userLinkDetails.blank?)
-              return "Error re-obtaining account linking details. Please notify an admin via private message."
-            end
-            userLinkDetails[:remote_error] = "Evaluation codes cannot be linked. Please check you are using the correct purchased registration code."
-            return userLinkDetails
-          elsif remoteStatusLower == "used"
-            # Handle situation where account is already linked, and it looks like it was linked to this account
-            # but we failed to record the fact on our side. e.g. Read-only mode, power failure, transaction failure after
-            # we already told the remote system to create the link. It'll think we're linked but we won't know.
-            # No other account should have the same linkId already. (So if a linked account is renamed, and remains
-            # linked, someone cannot then create an account with the old name and take over their reg code.
-            # Unlikely, but not impossible (people publicly post their codes sometimes), and simple to check.)
-            # If we *already* tried to take ownership once, give up, else we could loop forever.
-            remoteUserName = jsonRemoteResult[:link]   # What the remote database thinks is the forum username.
-            remoteLinkId   = jsonRemoteResult[:linkId] # Unique ID representing the link / row in the remote database.
-            if (!takeOwnershipDoneOnce &&
-                !(remoteUserName.blank?) && (remoteUserName.is_a? String)  &&
-                !(remoteLinkId.blank?)   && (remoteLinkId.is_a? String)    &&
-                (remoteUserName.downcase == user_record.username.downcase) &&
-                (UserCustomField.find_by(name: "directoryopus_link_id", value: remoteLinkId).blank?))
-              takeOwnership = true
-            end
-            
-            if !takeOwnership
-              # OK, it is used for real, so return a simple error.
-              userLinkDetails[:remote_error] = "That registration code is already linked to another account."
-              return userLinkDetails
-            end
-          end
-          
-          break if !takeOwnership
+          return userLinkDetails
         end
       end
 
