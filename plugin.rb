@@ -389,10 +389,12 @@ after_initialize do
         return "Error obtaining account linking details. Please notify an admin via private message."
       end
 
+      # "clear local" also now clears the remote side.
       if (operationClearLocal)
           oldContext = makeLinkContextLine(userLinkDetails[:link_version], userLinkDetails[:link_edition], userLinkDetails[:link_id])
           newContext = makeLinkContextLine(nil, nil, nil)
           logAdminAction(current_user, user_record, "linkopus_unlink", oldContext, newContext, nil)
+          callRemoteLinkingServer("unlink", { :linkId => userLinkDetails[:link_id] } )
           setUserLinkData(user_record, "invalid", nil, nil, nil, false)
           userLinkDetails = getUserLinkData(user_record)
           return userLinkDetails
