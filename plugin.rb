@@ -501,7 +501,7 @@ after_initialize do
 
           # OK, it is used for real, so return a simple error.
           maxUses = jsonRemoteResult[:max]
-          if max == 1
+          if maxUses == 1
             userLinkDetails[:remote_error] = "That registration code is already linked to another account."
           else
             userLinkDetails[:remote_error] = "That registration code has been linked the maximum number of times (#{maxUses})."
