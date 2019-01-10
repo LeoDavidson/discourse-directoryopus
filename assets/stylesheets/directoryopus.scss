@@ -9,7 +9,7 @@
 .directoryopus-link-status .directoryopus-link-userpage-pro, .names span.directoryopus-link-poster-pro {
 	&, a {
 		color: #daa520;
-		i.fa {
+		i.fa, svg.fa {
 			font-size: 1.1em;
 			color: #daa520;
 			margin: 0;
@@ -20,7 +20,7 @@
 .directoryopus-link-status .directoryopus-link-userpage-light, .names span.directoryopus-link-poster-light {
 	&, a {
 		color: #20bfda;
-		i.fa {
+		i.fa, svg.fa {
 			font-size: 1.1em;
 			color: #20bfda;
 			margin: 0;
@@ -31,7 +31,7 @@
 .directoryopus-link-status .directoryopus-link-userpage-pleaselink, .names span.directoryopus-link-poster-pleaselink {
 	&, a {
 		color: #a21930;
-		i.fa {
+		i.fa, svg.fa {
 			font-size: 1.1em;
 			color: #a21930;
 			margin: 0;
@@ -81,7 +81,7 @@
 			vertical-align: top;
 		}
 
-		i { color: $primary; }
+		i, svg { color: $primary; }
 		a:hover i { color: $quaternary; }
 		a.active i { color: $secondary; }
 	}
@@ -286,6 +286,7 @@
 		input {
 			margin-top: 2px;
 			margin-bottom: 2px;
+			width: 250px;
 		}
 	}
 	.directoryopus-link-instructions {
