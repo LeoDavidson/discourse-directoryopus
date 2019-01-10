@@ -9,6 +9,7 @@ enabled_site_setting :directoryopus_enabled
 register_asset 'stylesheets/directoryopus.scss'
 register_asset 'stylesheets/directoryopus_mobile_only.scss', :mobile
 # register_asset 'stylesheets/directoryopus_desktop_only.scss', :desktop
+register_svg_icon "asterisk" if respond_to?(:register_svg_icon)
 register_svg_icon "star" if respond_to?(:register_svg_icon)
 register_svg_icon "link" if respond_to?(:register_svg_icon)
 register_svg_icon "chain-broken" if respond_to?(:register_svg_icon)
