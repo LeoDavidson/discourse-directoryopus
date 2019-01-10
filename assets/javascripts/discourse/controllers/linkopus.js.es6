@@ -132,7 +132,7 @@ export default Ember.Controller.extend({
 			// This test is to ensure the regcode doesn't contain any HTML or script code, as we will insert it raw via
 			// Ember.String.htmlSafe. htmlSafe vouches that the string is safe rather; it doesn't make the string safe.
 			if (/^[-\w\*]+$/.test(regCodeRedacted)) {
-				regCodeRedacted = regCodeRedacted.replace(/\*/g,"<i class=\"fa fa-asterisk\"></i>");
+				regCodeRedacted = regCodeRedacted.replace(/\*/g,"<svg class=\"fa d-icon d-icon-asterisk svg-icon svg-string\" xmlns=\"http://www.w3.org/2000/svg\"><use xlink:href=\"#asterisk\"></use></svg>");
 				jsonResult["link_reg_code_redacted"] = Ember.String.htmlSafe(regCodeRedacted);
 			}
 		}
