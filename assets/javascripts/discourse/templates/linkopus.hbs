@@ -14,7 +14,7 @@
 					<div class="directoryopus-link-admin">
 						<p><b>Admin Only</b></p>
 						<p class="directoryopus-link-linkid">Link ID: {{opuslinkLoadResult.link_id}}</p>
-						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink Local"><i class="fa fa-chain-broken fa-fw"></i> Unlink Local</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
+						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><i class="fa fa-chain-broken fa-fw"></i> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
 						<p>(This clears both the forum and remote side links for the user.)</p>
 					</div>
 				{{/if}}
