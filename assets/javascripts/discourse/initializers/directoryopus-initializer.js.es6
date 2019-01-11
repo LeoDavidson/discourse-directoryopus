@@ -45,7 +45,7 @@ function posterIconCallback(cfs, attrs) {
 				icon: "link",
 				emoji: "link",
 				className: "directoryopus-link-poster-pleaselink",
-				text: " Link your account for priority support",
+				text: " CLICK HERE: Link your account for priority support",
 				title: "Account Linking",
 				url: "/link-opus"
 			};
