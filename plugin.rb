@@ -366,11 +366,19 @@ after_initialize do
 
       if params.has_key?(:user_id)
         user_id = params[:user_id]
-        if user_id.is_a? String
+        if user_id.is_a? Numeric
+          user_record = User.find_by_id(user_id)
+        elsif user_id.is_a? String
           user_record = User.find_by_id(user_id.to_i)
         end
       end
 
+      if user_record.blank?
+        if params.has_key?(:username)
+          user_record = User.find_by_username(params[:username])
+        end      
+      end
+      
       if user_record.blank?
         return "Invalid user_id"
       end
