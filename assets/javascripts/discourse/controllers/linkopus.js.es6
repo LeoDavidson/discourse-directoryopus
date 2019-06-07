@@ -47,8 +47,10 @@ export default Ember.Controller.extend({
 			reg_code: regCode,
 		};
 
-		// Filter out null parameters.
-		dataParams = _.pickBy(dataParams);
+		// Filter out undefined parameter values.
+		dataParams = Object.entries(dataParams)
+			.filter(([name, value]) => typeof value !== "undefined")
+				.map(([name, value]) => ({name, value}));
 
 		// Start the ajax/json request, which is async.
 		// When/if it finishes successfully, store the json results on the model.
