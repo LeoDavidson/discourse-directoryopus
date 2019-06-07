@@ -47,8 +47,8 @@ export default Ember.Controller.extend({
 			reg_code: regCode,
 		};
 
-		// Filter out null parameters. n.b. Can use _.pickBy(obj) with lodash 4, but Discourse seems to be on 1.3.
-		dataParams = _.pick(dataParams, _.identity);
+		// Filter out null parameters.
+		dataParams = _.pickBy(dataParams);
 
 		// Start the ajax/json request, which is async.
 		// When/if it finishes successfully, store the json results on the model.
