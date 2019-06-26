@@ -159,7 +159,7 @@ after_initialize do
       return true
     end
 
-    def addUserFailureCode(user, invalidCode, isEval)
+    def addUserFailureCode(user, invalidCode, codePrefix)
       if (user.is_a? Numeric)
         u = User.find_by_id(user)
       else
@@ -185,9 +185,7 @@ after_initialize do
       if current_user.id == u.id
         actingUserForLog = -1 # Mark it as the system user if it's (presumably) not an admin changing someone else, since it's an admin action log not a user action log.
       end
-      evalString = ""
-      evalString = "Eval " if isEval
-      logDetails = "RegCode: #{evalString}#{invalidCode.gsub(/^([A-Z0-9]{5}-){3}(.+)$/, '...-\2')}"
+      logDetails = "RegCode: #{codePrefix} #{invalidCode.gsub(/^([A-Z0-9]{5}-){3}(.+)$/, '...-\2')}"
       logAdminAction(actingUserForLog, u, "linkopus_badcode", nil, nil, logDetails)
       if (failMap.size >= MAX_REGCODE_FAILS)
         logDetails = "MaxAttempts: #{MAX_REGCODE_FAILS}"
@@ -482,7 +480,7 @@ after_initialize do
         end
 
         if remoteStatusLower == "invalid"
-          addUserFailureCode(user_record, regCode, false)
+          addUserFailureCode(user_record, regCode, "Invalid")
           userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
           if (userLinkDetails.blank?)
             return "Error re-obtaining account linking details. Please notify an admin via private message."
@@ -490,7 +488,7 @@ after_initialize do
           userLinkDetails[:remote_error] = "Invalid registration code."
           return userLinkDetails
         elsif remoteStatusLower == "eval"
-          addUserFailureCode(user_record, regCode, true)
+          addUserFailureCode(user_record, regCode, "Eval")
           userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
           if (userLinkDetails.blank?)
             return "Error re-obtaining account linking details. Please notify an admin via private message."
@@ -498,7 +496,7 @@ after_initialize do
           userLinkDetails[:remote_error] = "Evaluation codes cannot be linked. Please check you are using the correct purchased registration code."
           return userLinkDetails
         elsif remoteStatusLower == "already_linked"
-          addUserFailureCode(user_record, regCode, false)
+          addUserFailureCode(user_record, regCode, "Already")
           userLinkDetails = getUserLinkData(user_record) # This is mainly for admin users, so they see the failed code immediately.
           if (userLinkDetails.blank?)
             return "Error re-obtaining account linking details. Please notify an admin via private message."
@@ -514,8 +512,10 @@ after_initialize do
           # OK, it is used for real, so return a simple error.
           maxUses = jsonRemoteResult[:max]
           if maxUses == 1
+            addUserFailureCode(user_record, regCode, "Used")
             userLinkDetails[:remote_error] = "That registration code is already linked to another account."
           else
+            addUserFailureCode(user_record, regCode, "UsedMax")
             userLinkDetails[:remote_error] = "That registration code has been linked the maximum number of times (#{maxUses})."
           end
           return userLinkDetails
