@@ -1,4 +1,6 @@
-export default Discourse.Route.extend({
+import DiscourseRoute from "discourse/routes/discourse";
+
+export default DiscourseRoute.extend({
 
 	beforeModel() {
 		// If a user is logged in, take them to their personal account-linking page.
