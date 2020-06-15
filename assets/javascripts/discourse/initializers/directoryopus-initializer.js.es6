@@ -52,7 +52,7 @@ function posterIconCallback(cfs, attrs) {
 		}
 		else {
 			return {
-				icon: "chain-broken",
+				icon: "unlink",
 				className: "directoryopus-link-poster-pleaselink",
 				title: "Not linked to a Directory Opus version or registration"
 			};
