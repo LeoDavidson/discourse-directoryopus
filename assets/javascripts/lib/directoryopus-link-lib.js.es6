@@ -37,7 +37,7 @@ export default {
 		}
 		else if (!viewingStaff) {
 			opusLinkClass = "directoryopus-link-userpage-pleaselink";
-			opusLinkIcon = "chain-broken";
+			opusLinkIcon = "unlink";
 			opusLinkText = "Not linked" + (small?"":" to a Directory Opus version or registration");
 		}
 
