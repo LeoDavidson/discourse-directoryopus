@@ -48,6 +48,27 @@
 					{{/if}}
 				</div>
 			{{else}}
+				{{#if opuslinkIsAdmin}}
+					<div class="directoryopus-link-admin">
+						<p><b>Admin Only</b></p>
+						{{#if opuslinkLoadResult.link_failures}}
+							<p>Invalid code attempts (alphabetical):</p>
+							<ol>
+								{{#each opuslinkLoadResult.link_failures as |badCode|}}
+									<li>{{badCode}}</li>
+								{{else}}
+									<li>(none)</li>
+								{{/each}}
+							</ol>
+							<p><button {{action "onOpusLinkClearFailures"}} class="btn btn-primary" title="Clear Failures"><i class="fa fa-trash fa-fw"></i> Clear Failures</button></p>
+							<p>(This clears the user's list of failures and allows them to make more attempts if they were blocked.)</p>
+						{{else}}
+							<p>(No invalid code attempts recorded for this user.)</p>
+						{{/if}}
+					</div>
+				{{/if}}
+				<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
+				<p>To link your account:</p>
 			{{/if}}
 		{{else}}
 			{{#if opuslinkAjaxPending}}
