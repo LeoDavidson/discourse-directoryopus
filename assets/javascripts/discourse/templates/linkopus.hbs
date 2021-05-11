@@ -70,10 +70,6 @@
 				<p class="directoryopus-link-unlinked">Your forum account is <b>not</b> linked to a registered Directory Opus licence.</p>
 				<p>To link your account:</p>
 				<form class="directoryopus-link-form">
-					<div class="directoryopus-link-inputs">
-						<label>Directory Opus registration code: {{input enter="onOpusLinkSubmitRegCode" value=opuslinkRegCodeInput placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" title="Enter your Directory Opus registration code. e.g. ABC12-DE3FG-4HIJ5-KL6M7" pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}(-?[A-Za-z0-9])?\s*" size="32" autocomplete="off" autocorrect="off" autocapitalize="off" required="true"}}</label>
-						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="Submit">{{#if opuslinkAjaxPending}}<i class="fa fa-spinner fa-fw fa-spin"></i>{{else}}<i class="fa fa-check fa-fw"></i>{{/if}} Submit</button>
-					</div>
 					{{#if opuslinkLoadResult.remote_error}}
 						<p class="directoryopus-link-loaderror">
 							<span class="directoryopus-link-errorheading">Error:</span>
