@@ -52,8 +52,8 @@
 						{{#if opuslinkLoadResult.link_failures}}
 							<p>Invalid code attempts (alphabetical):</p>
 							<ol>
-								{{#each opuslinkLoadResult.link_failures as |badCode|}}
-									<li>{{badCode}}</li>
+								{{#each opuslinkLoadResult.link_failures}}
+									<li>{{this}}</li>
 								{{else}}
 									<li>(none)</li>
 								{{/each}}
