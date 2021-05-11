@@ -52,11 +52,7 @@
 						{{#if opuslinkLoadResult.link_failures}}
 							<p>Invalid code attempts (alphabetical):</p>
 							<ol>
-								{{#each opuslinkLoadResult.link_failures}}
-									<li>{{this}}</li>
-								{{else}}
-									<li>(none)</li>
-								{{/each}}
+								Failure list not working due to plugin compilation problem.
 							</ol>
 							<p><button {{action "onOpusLinkClearFailures"}} class="btn btn-primary" title="Clear Failures"><i class="fa fa-trash fa-fw"></i> Clear Failures</button></p>
 							<p>(This clears the user's list of failures and allows them to make more attempts if they were blocked.)</p>
