@@ -11,6 +11,44 @@
 				<p class="directoryopus-link-loading">...Please Wait...</p>
 			{{/if}}
 			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
+		{{else if opuslinkLoadResult}}
+			{{#if opuslinkLoadResult.link_status}}
+				{{#if opuslinkIsAdmin}}
+					<div class="directoryopus-link-admin">
+						<p><b>Admin Only</b></p>
+						<p class="directoryopus-link-linkid">Link ID: {{opuslinkLoadResult.link_id}}</p>
+						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><i class="fa fa-chain-broken fa-fw"></i> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
+						<p>(This clears both the forum and remote side links for the user.)</p>
+					</div>
+				{{/if}}
+				<div class="directoryopus-link-statrefdiv">
+					<div class="directoryopus-link-linked">
+						<p class="directoryopus-link-linkmain"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{opuslinkLoadResult.link_version}}</span> <span class="{{opuslinkLoadResult.link_edition_class}}">{{opuslinkLoadResult.link_edition}}</span> user.</span></p>
+						{{#if opuslinkLoadResult.link_refresh_have_details}}
+							<div class="directoryopus-link-linkdetails">
+								{{#if opuslinkLoadResult.link_reg_code_redacted}}
+									<span class="directoryopus-link-detailregcode"><span class="directoryopus-link-detailheading">Registration Code:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_code_redacted}}</span></span>
+								{{/if}}
+								{{#if opuslinkLoadResult.link_reg_date}}
+									<span class="directoryopus-link-detailregdate"><span class="directoryopus-link-detailheading">Registered On:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_date}}</span></span>
+								{{/if}}
+							</div>
+						{{/if}}
+					</div>
+					<div class="directoryopus-link-butref">
+						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<i class="fa fa-refresh fa-fw fa-spin"></i>{{else}}<i class="fa fa-refresh fa-fw"></i>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
+						{{#if opuslinkLoadResult.link_last_refreshed}}
+							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last refreshed</span> <span class="directoryopus-nowrap">{{opuslinkLoadResult.link_last_refreshed}}</span></p>
+						{{/if}}
+					</div>
+				</div>
+				<div class="directoryopus-inlineblock">
+					{{#if opuslinkLoadResult.remote_error}}
+						<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
+					{{/if}}
+				</div>
+			{{else}}
+			{{/if}}
 		{{else}}
 			{{#if opuslinkAjaxPending}}
 				<p class="directoryopus-link-loading">...Please Wait...</p>
