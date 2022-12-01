@@ -1,6 +1,6 @@
 import { ajax } from 'discourse/lib/ajax';
 import { extractError } from 'discourse/lib/ajax-error';
-import { user } from 'discourse/models/user';
+import User from 'discourse/models/user';
 //import computed from 'ember-addons/ember-computed-decorators';
 
 export default Ember.Controller.extend({
@@ -15,7 +15,7 @@ export default Ember.Controller.extend({
 	opuslinkRegCodeInput: "",
 
 	initPermissions() {
-		const currentUser  = user.current();
+		const currentUser  = User.current();
 		const currentAdmin = !!(currentUser && currentUser.get("admin"));
 		this.set("opuslinkClearSafety", true);
 		this.set("opuslinkIsAdmin", currentAdmin);
