@@ -1,7 +1,7 @@
 import { ajax } from 'discourse/lib/ajax';
 import { extractError } from 'discourse/lib/ajax-error';
 import User from 'discourse/models/user';
-import Ember from "@ember";
+import Ember from "ember";
 //import computed from 'ember-addons/ember-computed-decorators';
 
 export default Ember.Controller.extend({
