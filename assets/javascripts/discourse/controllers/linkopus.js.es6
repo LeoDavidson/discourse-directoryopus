@@ -2,6 +2,7 @@ import { ajax } from 'discourse/lib/ajax';
 import { extractError } from 'discourse/lib/ajax-error';
 import User from 'discourse/models/user';
 import Ember from "ember";
+import { htmlSafe } from '@ember/template';
 //import computed from 'ember-addons/ember-computed-decorators';
 
 export default Ember.Controller.extend({
@@ -137,7 +138,7 @@ export default Ember.Controller.extend({
 			// Ember.String.htmlSafe. htmlSafe vouches that the string is safe rather; it doesn't make the string safe.
 			if (/^[-\w\*]+$/.test(regCodeRedacted)) {
 				regCodeRedacted = regCodeRedacted.replace(/\*/g,"<svg class=\"fa d-icon d-icon-asterisk svg-icon svg-string\" xmlns=\"http://www.w3.org/2000/svg\"><use xlink:href=\"#asterisk\"></use></svg>");
-				jsonResult["link_reg_code_redacted"] = Ember.String.htmlSafe(regCodeRedacted);
+				jsonResult["link_reg_code_redacted"] = htmlSafe(regCodeRedacted);
 			}
 		}
 		if (typeof jsonResult["link_reg_date"] === "string") {
