@@ -643,7 +643,7 @@ after_initialize do
           remoteLinkId = remoteLinkDetails[:linkId]
           remoteEdition = remoteLinkDetails[:type]
           remoteVersion = remoteLinkDetails[:version]
-          if (remoteStatus != "linked" || remoteLinkId.blank? || !(remoteLinkId.is_a? String) || (remoteEdition != "pro" && remoteEdition != "light") || !(remoteVersion.is_a? Fixnum))
+          if (remoteStatus != "linked" || remoteLinkId.blank? || !(remoteLinkId.is_a? String) || (remoteEdition != "pro" && remoteEdition != "light") || !(remoteVersion.is_a? Integer))
             if (remoteLinkDetails[:end] == 1)
               expectedLast = true # There's a special ":end=>1" marker at the end so we know the data wasn't truncated.
             else
