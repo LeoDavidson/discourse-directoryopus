@@ -12,7 +12,7 @@ register_asset 'stylesheets/directoryopus_mobile_only.scss', :mobile
 register_svg_icon "asterisk" if respond_to?(:register_svg_icon)
 register_svg_icon "star" if respond_to?(:register_svg_icon)
 register_svg_icon "link" if respond_to?(:register_svg_icon)
-register_svg_icon "unlink" if respond_to?(:register_svg_icon)
+register_svg_icon "link-slash" if respond_to?(:register_svg_icon)
 
 require 'net/http'
 require 'json'
