@@ -15,7 +15,7 @@
 					<div class="directoryopus-link-admin">
 						<p><b>Admin Only</b></p>
 						<p class="directoryopus-link-linkid">Link ID: {{opuslinkLoadResult.link_id}}</p>
-						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><i class="fa fa-link-slash fa-fw"></i> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
+						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><svg class="fa d-icon d-icon-link-slash svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#link-slash"></use></svg></i> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
 						<p>(This clears both the forum and remote side links for the user.)</p>
 					</div>
 				{{/if}}
@@ -34,7 +34,7 @@
 						{{/if}}
 					</div>
 					<div class="directoryopus-link-butref">
-						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<i class="fa fa-rotate fa-fw fa-spin"></i>{{else}}<i class="fa fa-rotate fa-fw"></i>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
+						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg></i>{{else}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
 						{{#if opuslinkLoadResult.link_last_refreshed}}
 							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last refreshed</span> <span class="directoryopus-nowrap">{{opuslinkLoadResult.link_last_refreshed}}</span></p>
 						{{/if}}
@@ -58,7 +58,7 @@
 									<li>(none)</li>
 								{{/each}}
 							</ol>
-							<p><button {{action "onOpusLinkClearFailures"}} class="btn btn-primary" title="Clear Failures"><i class="fa fa-trash fa-fw"></i> Clear Failures</button></p>
+							<p><button {{action "onOpusLinkClearFailures"}} class="btn btn-primary" title="Clear Failures"><svg class="fa d-icon d-icon-trash svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#trash"></use></svg></i> Clear Failures</button></p>
 							<p>(This clears the user's list of failures and allows them to make more attempts if they were blocked.)</p>
 						{{else}}
 							<p>(No invalid code attempts recorded for this user.)</p>
@@ -71,7 +71,7 @@
 					<div class="directoryopus-link-inputs">
 						<label for="regcode">Directory Opus registration code:</label>
 						<Input @enter={{action "onOpusLinkSubmitRegCode"}} @value={{opuslinkRegCodeInput}} @placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" @pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}(-?[A-Za-z0-9])?\s*" @size="32" @autocomplete="off" @required="true" />
-						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="Submit">{{#if opuslinkAjaxPending}}<i class="fa fa-spinner fa-fw fa-spin"></i>{{else}}<i class="fa fa-check fa-fw"></i>{{/if}} Submit</button>
+						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="Submit">{{#if opuslinkAjaxPending}}<svg class="fa d-icon d-icon-spinner svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#spinner"></use></svg></i>{{else}}<svg class="fa d-icon d-icon-check svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#check"></use></svg>{{/if}} Submit</button>
 					</div>
 					{{#if opuslinkLoadResult.remote_error}}
 						<p class="directoryopus-link-loaderror">
