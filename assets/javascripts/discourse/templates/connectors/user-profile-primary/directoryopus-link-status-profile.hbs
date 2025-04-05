@@ -1,10 +1,10 @@
 {{#if this.siteSettings.directoryopus_enabled}}
-	{{#if opusLinkAnything}}
+	{{#if this.opusLinkAnything}}
 		<div class="directoryopus-link-status">
-			{{#if opusLinkClass}}
-				<div class="{{opusLinkClass}}">{{d-icon opusLinkIcon}} {{opusLinkText}}</div>
+			{{#if this.opusLinkClass}}
+				<div class="{{this.opusLinkClass}}">{{d-icon this.opusLinkIcon}} {{this.opusLinkText}}</div>
 			{{/if}}
-			{{#if opusCanLinkUser}}
+			{{#if this.opusCanLinkUser}}
 				<div class="opus-nav-pills">{{#link-to route='linkopus'}}<img class="link-opus-button-icon" src="/plugins/discourse-directoryopus/images/opus_icon.png">{{i18n 'directoryopus.linkopus_title'}}{{/link-to}}</div>
 			{{/if}}
 		</div>
