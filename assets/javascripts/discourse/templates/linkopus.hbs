@@ -4,55 +4,55 @@
 	<h1 class="directoryopus-link-heading"><img class="directoryopus-logo" src="/plugins/discourse-directoryopus/images/opus_logo.png" alt=""> <span class="directoryopus-link-headingtext">Directory&nbsp;Opus - Account&nbsp;Linking</span></h1>
 
 	{{#if model}}
-		{{#if opuslinkLoadError}}
-			{{#if opuslinkAjaxPending}}
+		{{#if this.opuslinkLoadError}}
+			{{#if this.opuslinkAjaxPending}}
 				<p class="directoryopus-link-loading">...Please Wait...</p>
 			{{/if}}
-			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadError}}</span></p>
-		{{else if opuslinkLoadResult}}
-			{{#if opuslinkLoadResult.link_status}}
-				{{#if opuslinkIsAdmin}}
+			<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{this.opuslinkLoadError}}</span></p>
+		{{else if this.opuslinkLoadResult}}
+			{{#if this.opuslinkLoadResult.link_status}}
+				{{#if this.opuslinkIsAdmin}}
 					<div class="directoryopus-link-admin">
 						<p><b>Admin Only</b></p>
-						<p class="directoryopus-link-linkid">Link ID: {{opuslinkLoadResult.link_id}}</p>
-						<p><button {{action "onOpusLinkClearLocal"}} disabled={{opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><svg class="fa d-icon d-icon-link-slash svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#link-slash"></use></svg> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=opuslinkClearSafety class="toggle"}} Safety</label></p>
+						<p class="directoryopus-link-linkid">Link ID: {{this.opuslinkLoadResult.link_id}}</p>
+						<p><button {{action "onOpusLinkClearLocal"}} disabled={{this.opuslinkClearSafety}} class="btn btn-primary" title="Unlink"><svg class="fa d-icon d-icon-link-slash svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#link-slash"></use></svg> Unlink</button> <label class="directoryopus-link-clearsafety">{{input type="checkbox" checked=this.opuslinkClearSafety class="toggle"}} Safety</label></p>
 						<p>(This clears both the forum and remote side links for the user.)</p>
 					</div>
 				{{/if}}
 				<div class="directoryopus-link-statrefdiv">
 					<div class="directoryopus-link-linked">
-						<p class="directoryopus-link-linkmain"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{opuslinkLoadResult.link_version}}</span> <span class="{{opuslinkLoadResult.link_edition_class}}">{{opuslinkLoadResult.link_edition}}</span> user.</span></p>
-						{{#if opuslinkLoadResult.link_refresh_have_details}}
+						<p class="directoryopus-link-linkmain"><span class="directoryopus-link-linkheading">Your forum account is <span class="directoryopus-link-linkstatus">linked</span>:</span> <span class="directoryopus-link-versionsummary">Registered <span class="directoryopus-link-program">Directory Opus</span> <span class="directoryopus-link-version">{{this.opuslinkLoadResult.link_version}}</span> <span class="{{this.opuslinkLoadResult.link_edition_class}}">{{this.opuslinkLoadResult.link_edition}}</span> user.</span></p>
+						{{#if this.opuslinkLoadResult.link_refresh_have_details}}
 							<div class="directoryopus-link-linkdetails">
-								{{#if opuslinkLoadResult.link_reg_code_redacted}}
-									<span class="directoryopus-link-detailregcode"><span class="directoryopus-link-detailheading">Registration Code:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_code_redacted}}</span></span>
+								{{#if this.opuslinkLoadResult.link_reg_code_redacted}}
+									<span class="directoryopus-link-detailregcode"><span class="directoryopus-link-detailheading">Registration Code:</span> <span class="directoryopus-link-detailvalue">{{this.opuslinkLoadResult.link_reg_code_redacted}}</span></span>
 								{{/if}}
-								{{#if opuslinkLoadResult.link_reg_date}}
-									<span class="directoryopus-link-detailregdate"><span class="directoryopus-link-detailheading">Registered On:</span> <span class="directoryopus-link-detailvalue">{{opuslinkLoadResult.link_reg_date}}</span></span>
+								{{#if this.opuslinkLoadResult.link_reg_date}}
+									<span class="directoryopus-link-detailregdate"><span class="directoryopus-link-detailheading">Registered On:</span> <span class="directoryopus-link-detailvalue">{{this.opuslinkLoadResult.link_reg_date}}</span></span>
 								{{/if}}
 							</div>
 						{{/if}}
 					</div>
 					<div class="directoryopus-link-butref">
-						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg>{{else}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
-						{{#if opuslinkLoadResult.link_last_refreshed}}
-							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last refreshed</span> <span class="directoryopus-nowrap">{{opuslinkLoadResult.link_last_refreshed}}</span></p>
+						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{this.opuslinkAjaxPending}} class="btn btn-primary" title="{{this.opuslinkLoadResult.link_refresh_details_title}}">{{#if this.opuslinkAjaxPending}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg>{{else}}<svg class="fa d-icon d-icon-rotate svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#rotate"></use></svg>{{/if}} {{this.opuslinkLoadResult.link_refresh_details_title}}</button></p>
+						{{#if this.opuslinkLoadResult.link_last_refreshed}}
+							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last refreshed</span> <span class="directoryopus-nowrap">{{this.opuslinkLoadResult.link_last_refreshed}}</span></p>
 						{{/if}}
 					</div>
 				</div>
 				<div class="directoryopus-inlineblock">
-					{{#if opuslinkLoadResult.remote_error}}
-						<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{opuslinkLoadResult.remote_error}}</span></p>
+					{{#if this.opuslinkLoadResult.remote_error}}
+						<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">{{this.opuslinkLoadResult.remote_error}}</span></p>
 					{{/if}}
 				</div>
 			{{else}}
-				{{#if opuslinkIsAdmin}}
+				{{#if this.opuslinkIsAdmin}}
 					<div class="directoryopus-link-admin">
 						<p><b>Admin Only</b></p>
-						{{#if opuslinkLoadResult.link_failures}}
+						{{#if this.opuslinkLoadResult.link_failures}}
 							<p>Invalid code attempts (alphabetical):</p>
 							<ol>
-								{{#each opuslinkLoadResult.link_failures as |badCode|}}
+								{{#each this.opuslinkLoadResult.link_failures as |badCode|}}
 									<li>{{badCode}}</li>
 								{{else}}
 									<li>(none)</li>
@@ -70,15 +70,15 @@
 				<form class="directoryopus-link-form">
 					<div class="directoryopus-link-inputs">
 						<label for="regcode">Directory Opus registration code:</label>
-						<Input @enter={{action "onOpusLinkSubmitRegCode"}} @value={{opuslinkRegCodeInput}} @placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" @pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}(-?[A-Za-z0-9])?\s*" @size="32" @autocomplete="off" @required="true" />
-						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="Submit">{{#if opuslinkAjaxPending}}<svg class="fa d-icon d-icon-spinner svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#spinner"></use></svg>{{else}}<svg class="fa d-icon d-icon-check svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#check"></use></svg>{{/if}} Submit</button>
+						<Input @enter={{action "onOpusLinkSubmitRegCode"}} @value={{this.opuslinkRegCodeInput}} @placeholder="e.g. ABC12-DE3FG-4HIJ5-KL6M7" @pattern="\s*[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}(-?[A-Za-z0-9])?\s*" @size="32" @autocomplete="off" @required="true" />
+						<button {{action "onOpusLinkSubmitRegCode"}} disabled={{this.opuslinkAjaxPending}} class="btn btn-primary" title="Submit">{{#if this.opuslinkAjaxPending}}<svg class="fa d-icon d-icon-spinner svg-icon svg-string fa-spin" xmlns="http://www.w3.org/2000/svg"><use href="#spinner"></use></svg>{{else}}<svg class="fa d-icon d-icon-check svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#check"></use></svg>{{/if}} Submit</button>
 					</div>
-					{{#if opuslinkLoadResult.remote_error}}
+					{{#if this.opuslinkLoadResult.remote_error}}
 						<p class="directoryopus-link-loaderror">
 							<span class="directoryopus-link-errorheading">Error:</span>
 							<span class="directoryopus-link-errormessage">
-								{{opuslinkLoadResult.remote_error}}
-								{{#if opuslinkRegCodeExample}}
+								{{this.opuslinkLoadResult.remote_error}}
+								{{#if this.opuslinkRegCodeExample}}
 									<br>Codes should look like: ABC12-DE3FG-4HIJ5-KL6M7
 								{{/if}}
 							</span>
@@ -88,8 +88,8 @@
 						<li>Use the most recent code we emailed you. New codes (e.g. for upgrades) replace old ones.</li>
 						<li><a href="https://www.gpsoft.com.au/DScripts/lostcode.asp">Lost Registration Retrieval</a> can email your code again.</li>
 						<li>You can normally find your registration code via the program itself.
-							<label class="directoryopus-link-showme">{{input type="checkbox" checked=opuslinkRegCodeShowMe class="toggle"}} Show Me</label>
-							{{#if opuslinkRegCodeShowMe}}
+							<label class="directoryopus-link-showme">{{input type="checkbox" checked=this.opuslinkRegCodeShowMe class="toggle"}} Show Me</label>
+							{{#if this.opuslinkRegCodeShowMe}}
 								<ol>
 									<li>Select <b>Help &gt; Licence Manager</b> near the top-right of the default lister toolbars.</li>
 									<li>Select <b>Current Certificate Status</b> on the left.</li>
@@ -107,14 +107,14 @@
 				</form>
 			{{/if}}
 		{{else}}
-			{{#if opuslinkAjaxPending}}
+			{{#if this.opuslinkAjaxPending}}
 				<p class="directoryopus-link-loading">...Please Wait...</p>
 			{{else}}
 				<p class="directoryopus-link-loaderror"><span class="directoryopus-link-errorheading">Error:</span> <span class="directoryopus-link-errormessage">Empty result from server.</span></p>
 			{{/if}}
 		{{/if}}
 	{{else}}
-		{{#if opuslinkAjaxPending}}
+		{{#if this.opuslinkAjaxPending}}
 			<p class="directoryopus-link-loading">...Please Wait...</p>
 		{{/if}}
 		<p class="directoryopus-link-getback">
