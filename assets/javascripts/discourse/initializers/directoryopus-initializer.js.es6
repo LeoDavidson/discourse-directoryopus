@@ -73,13 +73,14 @@ function apiInitCallback(api)
 	// to check exactly what was being looked for when the menu opens. Not obvious or documented
 	// but you start to get a feel for it.
 	// Turns out it's mentioned and confirmed here, too: https://meta.discourse.org/t/a-tour-of-how-the-widget-virtual-dom-code-in-discourse-works/40347/33
-	api.decorateWidget('hamburger-menu:generalLinks', dec => {
-		return {
-			route: 'linkopuslanding',
-			className: 'link-opus-link',
-			label: 'directoryopus.linkopus_title'
-		};
-	});
+	// April 2025: Removed this as it no longer works, like most things in Discourse.
+//	api.decorateWidget('hamburger-menu:generalLinks', dec => {
+//		return {
+//			route: 'linkopuslanding',
+//			className: 'link-opus-link',
+//			label: 'directoryopus.linkopus_title'
+//		};
+//	});
 
 	// Icons next to linked users
 	api.addPosterIcon(posterIconCallback);
