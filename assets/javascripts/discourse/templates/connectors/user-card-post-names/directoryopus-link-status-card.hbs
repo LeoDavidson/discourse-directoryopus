@@ -1,8 +1,8 @@
 {{#if this.siteSettings.directoryopus_enabled}}
-	{{#if opusLinkAnything}}
+	{{#if this.opusLinkAnything}}
 		<div class="directoryopus-link-status">
-			{{#if opusLinkClass}}
-				<span class="{{opusLinkClass}}">{{d-icon opusLinkIcon}} {{opusLinkText}}</span>
+			{{#if this.opusLinkClass}}
+				<span class="{{this.opusLinkClass}}">{{d-icon this.opusLinkIcon}} {{this.opusLinkText}}</span>
 			{{/if}}
 		</div>
 	{{/if}}
