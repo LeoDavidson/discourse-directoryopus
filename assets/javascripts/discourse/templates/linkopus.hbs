@@ -34,7 +34,7 @@
 						{{/if}}
 					</div>
 					<div class="directoryopus-link-butref">
-						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<i class="fa fa-refresh fa-fw fa-spin"></i>{{else}}<i class="fa fa-refresh fa-fw"></i>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
+						<p class="directoryopus-link-refresh"><button {{action "onOpusLinkRefresh"}} disabled={{opuslinkAjaxPending}} class="btn btn-primary" title="{{opuslinkLoadResult.link_refresh_details_title}}">{{#if opuslinkAjaxPending}}<i class="fa fa-rotate fa-fw fa-spin"></i>{{else}}<i class="fa fa-rotate fa-fw"></i>{{/if}} {{opuslinkLoadResult.link_refresh_details_title}}</button></p>
 						{{#if opuslinkLoadResult.link_last_refreshed}}
 							<p class="directoryopus-link-lastrefresh"><span class="directoryopus-nowrap">Last refreshed</span> <span class="directoryopus-nowrap">{{opuslinkLoadResult.link_last_refreshed}}</span></p>
 						{{/if}}
