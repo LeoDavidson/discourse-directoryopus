@@ -13,6 +13,10 @@ register_svg_icon "asterisk" if respond_to?(:register_svg_icon)
 register_svg_icon "star" if respond_to?(:register_svg_icon)
 register_svg_icon "link" if respond_to?(:register_svg_icon)
 register_svg_icon "link-slash" if respond_to?(:register_svg_icon)
+register_svg_icon "rotate" if respond_to?(:register_svg_icon)
+register_svg_icon "trash" if respond_to?(:register_svg_icon)
+register_svg_icon "spinner" if respond_to?(:register_svg_icon)
+register_svg_icon "check" if respond_to?(:register_svg_icon)
 
 require 'net/http'
 require 'json'
