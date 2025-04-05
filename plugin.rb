@@ -17,6 +17,7 @@ register_svg_icon "rotate" if respond_to?(:register_svg_icon)
 register_svg_icon "trash" if respond_to?(:register_svg_icon)
 register_svg_icon "spinner" if respond_to?(:register_svg_icon)
 register_svg_icon "check" if respond_to?(:register_svg_icon)
+register_svg_icon "circle-info" if respond_to?(:register_svg_icon)
 
 require 'net/http'
 require 'json'
