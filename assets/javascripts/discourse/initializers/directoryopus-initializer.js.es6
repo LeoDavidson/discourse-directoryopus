@@ -33,7 +33,7 @@ function posterIconCallback(cfs, attrs) {
 			icon: "star",
 			emoji: isLight ? "star" : "star2",
 			className: "directoryopus-link-poster" + (isPro?"-pro":isLight?"-light":""),
-			text: attrs.mobileView ? (" " + version + ((version>12)?"":isPro?"P":isLight?"L":"")) : (" Opus " + version + ((version>12)?"":isPro?" Pro":isLight?" Light":"")),
+			text: attrs.mobileView ? (" " + version) : (" Opus " + version + " user"),
 			title: (attrs.yours ? "Account Linking" : "Linked Account: Registered Directory Opus user"),
 			url: (attrs.yours ? "/my/link-opus" : null)
 		};
