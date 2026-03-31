@@ -33,7 +33,7 @@ export default {
 
 			opusLinkClass = "directoryopus-link-userpage" + (isPro?"-pro":isLight?"-light":"");
 			opusLinkIcon = "star";
-			opusLinkText = "Directory Opus " + version + ((version>12)?"":isPro?" Pro":isLight?" Light":"") + " user";
+			opusLinkText = "Directory Opus " + version + " user";
 		}
 		else if (!viewingStaff) {
 			opusLinkClass = "directoryopus-link-userpage-pleaselink";
